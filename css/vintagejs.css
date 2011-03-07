@@ -1,0 +1,28 @@
+.vintage-loader {
+    position: absolute;
+    height: 60px;
+    width: 180px;
+    margin-left: -90px;
+    margin-top: -30px;
+    background-color: #ffffff;
+    background-image: url('clock.png');
+    background-position: 5px 50%;
+    background-repeat: no-repeat;
+    text-align: left;
+    text-indent: 60px;
+    font: 20px/60px 'Georgia','Times New Roman','Times',serif;
+    border-radius: 5px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border: 3px solid #333;
+}
+.vintage-loader.error {
+    color: #900;
+    font-size: 12px;
+    line-height: 16px;
+    text-indent: 0;
+    background-image: none;
+    padding: 10px;
+    height: auto;
+    margin-left: -100px;
+}
