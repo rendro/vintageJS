@@ -134,7 +134,7 @@ jQuery.fn.vintage = function (options) {
          * Add loader on top of the image and start the image manipulation routine
          */
         var initVintage = function () {
-            var pos = obj.position();
+            var pos = obj.offset();
             pos.top += Math.round(obj.height()/2);
             pos.left += Math.round(obj.width()/2);
             loader = jQuery('<div class="vintage-loader">Loading&hellip;</div>');
