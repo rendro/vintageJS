@@ -45,9 +45,9 @@
 
         var r=[],g=[],b=[];
         for (var i=0; i<256; i++) {
-            r[i] = redCurve(i);
-            g[i] = greenCurve(i);
-            b[i] = blueCurve(i);
+            r[i] = redCurve(rgbCurve(i));
+            g[i] = greenCurve(rgbCurve(i));
+            b[i] = blueCurve(rgbCurve(i));
         }
         console.log(r);
         console.log(g);
