@@ -36,7 +36,8 @@ jQuery.fn.vintage = function (options) {
             strength: 0.1
         },
         desaturate: false,
-        allowMultiEffect: false
+        allowMultiEffect: false,
+        mime: 'image/jpeg'
     };
     
     /**
@@ -50,7 +51,8 @@ jQuery.fn.vintage = function (options) {
         noise: 25,
         screen: false,
         desaturate: 1,
-        allowMultiEffect: false
+        allowMultiEffect: false,
+        mime: 'image/jpeg'
     };
     
     /**
@@ -69,7 +71,8 @@ jQuery.fn.vintage = function (options) {
             strength: 0.47
         },
         desaturate: 0.7,
-        allowMultiEffect: false
+        allowMultiEffect: false,
+        mime: 'image/jpeg'
     };
 
     /**
@@ -80,7 +83,8 @@ jQuery.fn.vintage = function (options) {
         noise: false,
         screen: false,
         desaturate: false,
-        allowMultiEffect: true
+        allowMultiEffect: true,
+        mime: 'image/jpeg'
     };
 
     /**
@@ -183,8 +187,11 @@ jQuery.fn.vintage = function (options) {
                     manipulatePixels();
 
                     //replace source with BASE64 code
-                    obj.attr('src', canvas.toDataURL());
+                    obj.attr('src', canvas.toDataURL(options.mime));
                     loader.remove();
+                    if (typeof(options.callback) == 'function') {
+                        options.callback();
+                    }
                 };
             }
         };
