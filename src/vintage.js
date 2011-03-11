@@ -124,7 +124,7 @@ jQuery.fn.vintage = function (options) {
          */
         if (options.allowMultiEffect === false) {
             if (obj.data('vintage-applied') !== true) {
-                obj.data('vintage-applied',true);
+                obj.data('vintage-applied', true);
             } else {
                 return;
             }
