@@ -248,26 +248,11 @@ jQuery.fn.vintage = function (options) {
                 //add noise
                 if (options.noise > 0) {
                     var noise = Math.round(options.noise - Math.random() * options.noise/2);
-                    imageData.data[i  ] += noise;
-                    imageData.data[i+1] += noise;
-                    imageData.data[i+2] += noise;
 
-                    if (imageData.data[i] > 255) {
-                        imageData.data[i] = 255;
-                    } else if (imageData.data[i] < 0) {
-                        imageData.data[i] = 0;
-                    }
-
-                    if (imageData.data[i+1] > 255) {
-                        imageData.data[i+1] = 255;
-                    } else if (imageData.data[i+1] < 0) {
-                        imageData.data[i+1] = 0;
-                    }
-
-                    if (imageData.data[i+2] > 255) {
-                        imageData.data[i+2] = 255;
-                    } else if (imageData.data[i+2] < 0) {
-                        imageData.data[i+2] = 0;
+                    var dblHlp = 0;
+                    for(var k=0; k<3; k++){
+                        dblHlp = noise + imageData.data[i+k];
+                        imageData.data[i+k] = ((dblHlp > 255)? 255 : ((dblHlp < 0)? 0 : dblHlp));
                     }
                 }
 

@@ -10,7 +10,7 @@ This jQuery-Plugin was tested in the following browsers:
 * Mozilla FireFox 3.16.14
 * Google Chrome 9.0.597.107
 * Apple Safari 5.0.3
-* Opera 11.01 (strange color behaviour but I could not figure out why)
+* Opera 11.01
 * Internet Explorer 7+ (won't work because the canvas element is not supported, but at least the error message appears)
 
 ###Usage###
