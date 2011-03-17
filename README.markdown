@@ -5,13 +5,13 @@ vintageJS is a jQuery plugin that uses the html5 canvas element to add a great v
 ###Requirements###
 To use vintageJS you need the latest jQuery build from [jquery.com](http://www.jquery.com), a browser that supports the HTML5 canvas element and the current version of <span class="vjs">vintageJS</span> from [github](http://www.github.com/rendro/vintageJS/).
 
-This jQuery-Plugin was tested in the following browsers:
+This jQuery-Plugin was tested and worked fine in the following browsers:
 
 * Mozilla FireFox 3.16.14
 * Google Chrome 9.0.597.107
 * Apple Safari 5.0.3
 * Opera 11.01
-* Internet Explorer 7+ (won't work because the canvas element is not supported, but at least the error message appears)
+* Internet Explorer 9
 
 ###Usage###
 
