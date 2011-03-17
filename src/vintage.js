@@ -37,7 +37,29 @@ jQuery.fn.vintage = function (options) {
         },
         desaturate: false,
         allowMultiEffect: false,
-        mime: 'image/jpeg'
+        mime: 'image/jpeg',
+        viewFinder: false
+    };
+    
+    /**
+     * green options for the aging effects
+     */
+    var greenOptions = {
+        vignette: {
+            black: 0.6,
+            white: 0.1
+        },
+        noise: 20,
+        screen: {
+            red: 255,
+            green:255,
+            blue: 0,
+            strength: 0.1
+        },
+        desaturate: false,
+        allowMultiEffect: false,
+        mime: 'image/jpeg',
+        viewFinder: false
     };
     
     /**
@@ -52,7 +74,8 @@ jQuery.fn.vintage = function (options) {
         screen: false,
         desaturate: 1,
         allowMultiEffect: false,
-        mime: 'image/jpeg'
+        mime: 'image/jpeg',
+        viewFinder: false
     };
     
     /**
@@ -72,7 +95,8 @@ jQuery.fn.vintage = function (options) {
         },
         desaturate: 0.7,
         allowMultiEffect: false,
-        mime: 'image/jpeg'
+        mime: 'image/jpeg',
+        viewFinder: false
     };
 
     /**
@@ -84,7 +108,8 @@ jQuery.fn.vintage = function (options) {
         screen: false,
         desaturate: false,
         allowMultiEffect: true,
-        mime: 'image/jpeg'
+        mime: 'image/jpeg',
+        viewFinder: false
     };
 
     /**
@@ -95,6 +120,9 @@ jQuery.fn.vintage = function (options) {
     switch (options.preset) {
         case 'custom':
             options = jQuery.extend(customOptions, options);
+            break;
+        case 'green':
+            options = jQuery.extend(greenOptions, options);
             break;
         case 'sepia':
             options = jQuery.extend(sepiaOptions, options);
@@ -184,14 +212,14 @@ jQuery.fn.vintage = function (options) {
                         addVignetteEffect();
                     }
 
-                    manipulatePixels();
-
-                    //replace source with BASE64 code
-                    obj.attr('src', canvas.toDataURL(options.mime));
-                    loader.remove();
-                    if (typeof(options.callback) == 'function') {
-                        options.callback();
-                    }
+                    manipulatePixels(function () {
+                        //replace source with BASE64 code
+                        obj.attr('src', canvas.toDataURL(options.mime));
+                        loader.remove();
+                        if (typeof(options.callback) == 'function') {
+                            options.callback();
+                        }
+                    });
                 };
             }
         };
@@ -224,7 +252,7 @@ jQuery.fn.vintage = function (options) {
          * Depending on the option settings the curves are adjusted, all pixels are multiplied negativly with a color layer (similar to the photoshop blending mode "screen",
          * and a noise effect is added.
          */
-        var manipulatePixels = function () {
+        var manipulatePixels = function (callback) {
 
             var imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
 
@@ -266,8 +294,44 @@ jQuery.fn.vintage = function (options) {
 
             }
 
-            //put manipulated image data
-            ctx.putImageData(imageData, 0, 0);
+            if (options.viewFinder !== false) {
+                var img = new Image();
+                img.src = options.viewFinder;
+                img.onload = function () {
+
+                    var viewFinderCanvas = jQuery('<canvas></canvas>').get(0);
+                    var viewFinderCtx = viewFinderCanvas.getContext('2d');
+
+                    viewFinderCanvas.width = canvas.width;
+                    viewFinderCanvas.height = canvas.height;
+
+                    viewFinderCtx.drawImage(this, 0, 0, this.width, this.height, 0, 0, canvas.width, canvas.height);
+
+                    var viewFinderImageData = viewFinderCtx.getImageData(0, 0, canvas.width, canvas.height);
+
+                    for (var a = 0; a < imageData.data.length; a+=4) {
+
+                        //red channel
+                        var red = ( imageData.data[a  ] * viewFinderImageData.data[a  ]) / 255;
+                        imageData.data[a  ] = red > 255 ? 255 : red < 0 ? 0 : red;
+
+                        //green channel
+                        var green = ( imageData.data[a+1] * viewFinderImageData.data[a+1]) / 255;
+                        imageData.data[a+1] = green > 255 ? green : green < 0 ? 0 : green;
+
+                        //blue channel
+                        var blue = ( imageData.data[a+2] * viewFinderImageData.data[a+2]) / 255;
+                        imageData.data[a+2] = blue > 255 ? 255 : blue < 0 ? 0 : blue;
+                    }
+                    //put manipulated image data
+                    ctx.putImageData(imageData, 0, 0);
+                    callback();
+                }
+            } else {
+                //put manipulated image data
+                ctx.putImageData(imageData, 0, 0);
+                callback();
+            }
 
         };
 

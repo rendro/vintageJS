@@ -3,7 +3,7 @@
 vintageJS is a jQuery plugin that uses the html5 canvas element to add a great vintage look to your photos. It comes with three effect-presets and can be customized very easily.
 
 ###Requirements###
-To use vintageJS you need the latest jQuery build from [jquery.com](http://www.jquery.com), a browser that supports the HTML5 canvas element and the current version of <span class="vjs">vintageJS</span> from [github](http://www.github.com/rendro/vintageJS/).
+To use vintageJS you need the latest jQuery build from [jquery.com](http://www.jquery.com), a browser that supports the HTML5 canvas element and the current version of vintageJS from [github](http://www.github.com/rendro/vintageJS/).
 
 This jQuery-Plugin was tested and worked fine in the following browsers:
 
@@ -40,6 +40,7 @@ You can change the effect by adding options to the vintageJS call. There are thr
 
 * `default`: the default preset is used when no preset is given
 * `sepia`: sepia effect
+* `green`: green color overlay vintage effect
 * `grayscale`: turns image into grayscale image
 * `custom`: Only curves will be adjusted, all the other effects are switched off so that you can build your own vintage look
 
@@ -50,6 +51,9 @@ If you like to change the style to your own settings, here are the full options 
 * `screen`: Add a layer with the photoshop like blending mode "screen" to blur out colors. You can define a solid color and the opacity of the layer. Example: `screen: { red: 227, green: 12, blue: 169, strength: 0.1 }`
 * `desaturate`: False or value between 0 and 1, which is the percentage how much the image is desaturated
 * `allowMultiEffect`: If this flag is set to true, you may trigger the effect multiple times. Default value is false.
+* `mime`: Set the mime type of the returned image. Default is `image/jpeg`
+* `viewFinder`: Path to a viewFinder image that will be added to the image to create a ttv-Effect (through the viewfinder). You will find an example image under `documentation/img/viewfinder.jpg` (Source: [Nesster on Flickr](http://www.flickr.com/photos/nesster/409875082/sizes/o/))
+* `callback`: Callback function that is triggered when the base64 string of the new source is written to the DOM
 
 Here is how a custom call could look like:
 
