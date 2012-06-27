@@ -326,7 +326,7 @@ jQuery.fn.vintage = function (options) {
                     //put manipulated image data
                     ctx.putImageData(imageData, 0, 0);
                     callback();
-                }
+                };
             } else {
                 //put manipulated image data
                 ctx.putImageData(imageData, 0, 0);
