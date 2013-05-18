@@ -1,4 +1,4 @@
-;(function ( $, window, document, undefined ) {
+;(function($, window, document, undefined) {
   'use strict';
   $.fn.vintage = function(options, effect) {
     var VintageJS = function(originalImage, opts, effect) {
@@ -227,4 +227,4 @@
       }
     });
   };
-})( jQuery, window, document );
+})(jQuery, window, document);
