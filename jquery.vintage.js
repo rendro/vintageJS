@@ -1,6 +1,7 @@
 ;(function ( $, window, document, undefined ) {
+  'use strict';
   $.fn.vintage = function(options, effect) {
-    var vintageJS = function(originalImage, opts, effect) {
+    var VintageJS = function(originalImage, opts, effect) {
       if (false === (originalImage instanceof HTMLImageElement)) {
         throw 'The element (1st parameter) must be an instance of HTMLImageElement';
       }
@@ -222,7 +223,7 @@
     };
     return this.each(function() {
       if (!$.data(this, 'vintageJS')) {
-        $.data(this, 'vintageJS', new vintageJS( this, options, effect ));
+        $.data(this, 'vintageJS', new VintageJS( this, options, effect ));
       }
     });
   };
