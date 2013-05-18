@@ -1,0 +1,42 @@
+.box{
+	margin: 0 auto 50px;
+	width: @wideBoxWidth;
+	text-align: left;
+	.white-box;
+	.homepage &{
+		width: @smallBoxWidth;
+	}
+	.title{
+		display: block;
+		padding: 20px;
+		padding-top: 25px;
+		font: 200 20px/1 @alt-fontfamily;
+		text-align: center;
+		.box-shadow(0 1px rgba(0,0,0,0.1));
+	}
+	a.title{
+		.transition(color @short ease-in-out);
+		&:hover{
+			color: @linkColorHover;
+		}
+	}
+	.content{
+		padding: 20px;
+	}
+	.cta{
+		display: block;
+		text-align: center;
+		padding: 14px 20px 10px;
+		font: 400 16px/1 @alt-fontfamily;
+		color: @gray-4;
+		cursor: pointer;
+		.box-shadow(0 -1px rgba(0,0,0,0.1));
+		.transition(color @short ease-in-out);
+		&:hover{
+			color: @blue-1;
+		}
+		&:after{
+			content: "\00A0\203A";
+		}
+	}
+}
