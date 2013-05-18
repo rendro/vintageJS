@@ -1,4 +1,5 @@
-var vintageJS = function(originalImage, opts, effect) {
+var VintageJS = function(originalImage, opts, effect) {
+  'use strict';
   if (false === (originalImage instanceof HTMLImageElement)) {
     throw 'The element (1st parameter) must be an instance of HTMLImageElement';
   }
