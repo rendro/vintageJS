@@ -38,6 +38,10 @@
         var _effect = {};
         for(var name in defaultEffect) {
           _effect[name] = effect[name] || defaultEffect[name];
+          // allow functions to be passed as effect properties for calculation of e.g. curves
+          if (typeof(_effect[name]) === 'function') {
+            _effect[name] = _effect[name]();
+          }
         }
 
         // load base image and
