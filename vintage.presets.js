@@ -30,7 +30,8 @@ var vintagePresets = {
       b: 169,
       a: 0.15
     },
-    vignette: 0.7
+    vignette: 0.7,
+    viewFinder: 'img/viewfinder.jpg'
   },
   /**
    * Sepia effect
