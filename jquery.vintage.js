@@ -28,7 +28,8 @@
             vignette:   false,
             lighten:    false,
             noise:      false,
-            viewFinder: false
+            viewFinder: false,
+            sepia:      false
           };
 
       applyEffect = function (effect) {
@@ -127,6 +128,7 @@
         var
         idx,
         j, // for check value loop
+        r,g,b, // for sepia
         average,
         noise,
         _imageData = imageData.data;
@@ -149,7 +151,7 @@
           }
 
           // screen
-          if (!!effect.screen && !!effect.screen.r && !!effect.screen.g && !!effect.screen.b && !!effect.screen.a) {
+          if (!!effect.screen) {
             _imageData[idx  ] = 255 - ((255 - _imageData[idx  ]) * (255 - effect.screen.r * effect.screen.a) / 255);
             _imageData[idx+1] = 255 - ((255 - _imageData[idx+1]) * (255 - effect.screen.g * effect.screen.a) / 255);
             _imageData[idx+2] = 255 - ((255 - _imageData[idx+2]) * (255 - effect.screen.b * effect.screen.a) / 255);
@@ -170,6 +172,16 @@
             _imageData[idx+2] = _imageData[idx+2] * viewFinderImageData[idx+2] / 255;
           }
 
+          // sepia
+          if (!!effect.sepia) {
+            r = _imageData[idx  ];
+            g = _imageData[idx+1];
+            b = _imageData[idx+2];
+            _imageData[idx  ] = r * 0.393 + g * 0.769 + b * 0.189;
+            _imageData[idx+1] = r * 0.349 + g * 0.686 + b * 0.168;
+            _imageData[idx+2] = r * 0.272 + g * 0.534 + b * 0.131;
+          }
+
           // desaturate
           if (!!effect.desaturate) {
             average = ( _imageData[idx  ] + _imageData[idx+1] + _imageData[idx+2] ) / 3;
@@ -184,10 +196,6 @@
           for (j=2; j>=0; --j) {
             _imageData[idx+j] = ~~(_imageData[idx+j] > 255 ? 255 : _imageData[idx+j] < 0 ? 0 : _imageData[idx+j]);
           }
-
-          // if (i <= 0) {
-
-          // }
         }
         // write image data, finalize vintageJS
         ctx.putImageData(imageData, 0, 0);
