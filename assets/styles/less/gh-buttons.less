@@ -1,0 +1,42 @@
+.ghbuttons{
+	text-align: center;
+	margin-bottom: 20px;
+
+	a, iframe{
+		display: inline-block;
+		vertical-align: top;
+	}
+
+	a{
+		font: bold 11px/14px "Helvetica Neue",Helvetica,Arial,sans-serif;
+		text-decoration: none;
+	}
+
+	.download{
+		position: relative;
+		margin-right: 25px;
+		padding: 2px 5px 2px 19px;
+		white-space: nowrap;
+		border-radius: 3px;
+		border: 1px solid @green;
+		border-bottom-color: darken(@green, 10%);
+		cursor: pointer;
+		color: @white;
+		text-shadow: 0 1px 0 rgba(0,0,0,0.1);
+		background-color: @green;
+		.gradient-linear(rgba(255,255,255,0.15), rgba(255,255,255,0));
+		.transition(all .3s ease-in-out);
+		&:hover{
+			border-color: #518cc6 #518cc6 #2a65a0;
+			background-color: #599bdc;
+			// .gradient-linear(#599bdc, #3072b3);
+		}
+		&:before{
+			position: absolute;
+			content: "\21E7";
+			left: 4px;
+			top: 2px;
+			.transform(rotate(180deg));
+		}
+	}
+}

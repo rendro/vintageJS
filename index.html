@@ -4,10 +4,10 @@
   <meta charset="UTF-8">
   <title>vintageJS - add a retro/vintage effect to images using the HTML5 canvas element</title>
   <link href='http://fonts.googleapis.com/css?family=Exo:200,400' rel='stylesheet' type='text/css'/>
-  <!--<link rel="stylesheet" href="assets/style.css"/>-->
-  <link rel="stylesheet/less" type="text/css" href="assets/less/style.less" />
+  <!--<link rel="stylesheet" href="assets/styles/style.css"/>-->
+  <link rel="stylesheet/less" type="text/css" href="assets/styles/less/style.less" />
   <script src="https://raw.github.com/cloudhead/less.js/master/dist/less-1.3.3.min.js"></script>
-  <script src="assets/modernizr-2.6.2.js"></script>
+  <script src="assets/scripts/modernizr-2.6.2.js"></script>
 </head>
 <body>
 
@@ -24,20 +24,25 @@
   </div>
 
   <div class="ghbuttons">
-    <a href="https://github.com/rendro/vintageJS/archive/master.zip" class="btn" target="_blank">Download</a>
+    <a href="https://github.com/rendro/vintageJS/archive/master.zip" class="download" target="_blank">Download</a>
     <iframe src="http://ghbtns.com/github-btn.html?user=rendro&amp;repo=vintageJS&amp;type=watch&amp;count=true" allowtransparency="true" frameborder="0" scrolling="0" width="110" height="20"></iframe>
     <iframe src="http://ghbtns.com/github-btn.html?user=rendro&amp;repo=vintageJS&amp;type=fork&amp;count=true" allowtransparency="true" frameborder="0" scrolling="0" width="95" height="20"></iframe>
+    <a href="https://twitter.com/share" class="twitter-share-button" data-hashtags="vintageJS">Tweet</a>
   </div>
 
   <div class="box">
     <h2 class="title">Demo</h2>
-    <ul class="slideshow js_slideshow">
-      <li class="active"><img src="assets/images/beach.jpg" alt=""></li>
-      <li><img src="assets/images/city.jpg" alt=""></li>
-      <li><img src="assets/images/hall.jpg" alt=""></li>
-      <li><img src="assets/images/landscape.jpg" alt=""></li>
-      <li><img src="assets/images/portrait.jpg" alt=""></li>
-    </ul>
+    <div class="slideshow js_slideshow">
+      <ul>
+        <li class="active"><img src="assets/images/landscape.jpg" alt=""></li>
+        <li><img src="assets/images/portrait.jpg" alt=""></li>
+        <li><img src="assets/images/hall.jpg" alt=""></li>
+        <li><img src="assets/images/beach.jpg" alt=""></li>
+        <li><img src="assets/images/city.jpg" alt=""></li>
+      </ul>
+      <span class="btn js_prev">&lsaquo;</span>
+      <span class="btn js_next">&rsaquo;</span>
+    </div>
   </div>
 
   <div class="box">
@@ -209,18 +214,30 @@
     </div>
   </div>
   <script src="//code.jquery.com/jquery-2.0.0.min.js"></script>
-  <script src="assets/jquery.vintage.min.js"></script>
+  <script src="assets/scripts/slideshow.js"></script>
+  <script src="assets/scripts/jquery.vintage.js"></script>
+  <script src="assets/scripts/vintage.presets.js"></script>
   <script>
   less.refresh(1);
 
-  var active = 'active';
+  var active = 'active',
+      click = 'click',
+      slideshow = $('.js_slideshow');
 
-  $('.js_toggle').on('click', 'dt', function() {
+  new Slideshow( slideshow );
+
+  $('.js_toggle').on(click, 'dt', function() {
     $(this).addClass(active).siblings('dt').removeClass(active);
   });
-  $('.js_slideshow').on('click', 'li', function() {
-    !$(this).hasClass(active) && $(this).siblings( ['.',active].join('') ).addBack().toggleClass('active');
+
+  slideshow.find('img').vintage();
+  slideshow.on(click, 'img', function() {
+    $(this).data('vintageJS').vintage({
+      sepia: true
+    });
   });
+
+  $.getScript([(/^http:/.test(document.location)?'http':'https'),'://platform.twitter.com/widgets.js'].join(''));
 
   </script>
 </body>
