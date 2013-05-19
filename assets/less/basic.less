@@ -4,10 +4,10 @@
  */
 html{
 	min-height: 100%;
-	background: -webkit-linear-gradient(315deg, @bodyGradientFrom, @bodyGradientTo 80%), url('../images/shattered.png');
-	background: -moz-linear-gradient(315deg, @bodyGradientFrom, @bodyGradientTo 80%), url('../images/shattered.png');
-	background: -ms-linear-gradient(315deg, @bodyGradientFrom, @bodyGradientTo 80%), url('../images/shattered.png');
-	background: linear-gradient(315deg, @bodyGradientFrom, @bodyGradientTo 80%), url('../images/shattered.png');
+	background: -webkit-linear-gradient(315deg, @bodyGradientFrom, @bodyGradientTo 80%), url('../noisy_grid.png');
+	background: -moz-linear-gradient(315deg, @bodyGradientFrom, @bodyGradientTo 80%), url('../noisy_grid.png');
+	background: -ms-linear-gradient(315deg, @bodyGradientFrom, @bodyGradientTo 80%), url('../noisy_grid.png');
+	background: linear-gradient(315deg, @bodyGradientFrom, @bodyGradientTo 80%), url('../noisy_grid.png');
 	background-attachment: fixed, fixed;
 	.box-shadow(inset 0 1px rgba(255, 255, 255, 0.3));
 	-webkit-text-size-adjust: 100%;
@@ -18,13 +18,6 @@ body{
 	line-height: @base-lineheight;
 	font-weight: 200;
 	color: @gray-2;
-}
-
-.app{
-	width: @containerWidth;
-	margin: 0 auto;
-	position: relative;
-	text-align: center;
 }
 
 hr{
@@ -40,22 +33,6 @@ a{
 h3{
 	font: 100 20px/1.4 @headline-fontfamily;
 }
-
-// p{
-// 	margin-bottom: @base-lineheight;
-// }
-
-span.amp{
-	font-family: 'Palatino Linotype', Palatino, Georgia, 'Times New Roman', serif;
-	font-style: italic;
-}
-.footer{
-	display: none;
-	//TODO
-}
-.hide{
-	display: none;
-}
-strong{
-	font-weight: 400;
+p{
+	margin-bottom: @base-lineheight;
 }

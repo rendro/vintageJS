@@ -46,3 +46,14 @@
 	-moz-transform: @value;
 	transform: @value;
 }
+
+.gradient-linear (@from, @to){
+	background-color: mix(@from, @to, 50%);
+	background-image: -webkit-gradient(linear,0 0,0 100%,from(@from),to(@to));
+	background-image: -webkit-linear-gradient(@from, @to);
+	background-image: -moz-linear-gradient(top, @from, @to);
+	background-image: -ms-linear-gradient(@from, @to);
+	background-image: -o-linear-gradient(@from, @to);
+	background-image: linear-gradient(@from, @to);
+	background-repeat: no-repeat;
+}

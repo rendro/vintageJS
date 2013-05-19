@@ -1,28 +1,195 @@
 <!doctype html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<title>vintageJS - add a retro/vintage effect to images using the HTML5 canvas element</title>
-	<link href='http://fonts.googleapis.com/css?family=Exo:200,400' rel='stylesheet' type='text/css'/>
-	<link rel="stylesheet" href="assets/style.css"/>
+  <meta charset="UTF-8">
+  <title>vintageJS - add a retro/vintage effect to images using the HTML5 canvas element</title>
+  <link href='http://fonts.googleapis.com/css?family=Exo:200,400' rel='stylesheet' type='text/css'/>
+  <!--<link rel="stylesheet" href="assets/style.css"/>-->
+  <link rel="stylesheet/less" type="text/css" href="assets/less/style.less" />
+  <script src="https://raw.github.com/cloudhead/less.js/master/dist/less-1.3.3.min.js"></script>
 </head>
 <body>
 
-	<div class="header">
-		<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="60px" height="60px">
-			<g>
-				<circle cx="30" cy="30" r="29" stroke="#444" fill="none" stroke-width="2"/>
-				<circle cx="30" cy="30" r="26" fill="#444"/>
-				<polygon fill="#FFFFFF" points="0,13 -45.084,-48.024 -65.197,-20.8 0,67.449 65.197,-20.8 45.084,-48.024" transform="translate(30,30) scale(0.23,0.23)"/>
-			</g>
-		</svg>
-		<h1>vintage<span>JS</span></h1>
-		<h2>add a retro / vintage effect to images <small>using the HTML5 canvas element</small></h2>
-	</div>
+  <div class="header">
+    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="60px" height="60px">
+      <g>
+        <circle cx="30" cy="30" r="29" stroke="#444" fill="none" stroke-width="2"/>
+        <circle cx="30" cy="30" r="26" fill="#444"/>
+        <polygon fill="#FFFFFF" points="0,13 -45.084,-48.024 -65.197,-20.8 0,67.449 65.197,-20.8 45.084,-48.024" transform="translate(30,30) scale(0.23,0.23)"/>
+      </g>
+    </svg>
+    <h1>vintage<span>JS</span></h1>
+    <h2>add a retro / vintage effect to images <small>using the HTML5 canvas element</small></h2>
+  </div>
 
+  <div class="ghbuttons">
+    <a href="https://github.com/rendro/vintageJS/archive/master.zip" class="btn" target="_blank">Download</a>
+    <iframe src="http://ghbtns.com/github-btn.html?user=rendro&amp;repo=vintageJS&amp;type=watch&amp;count=true" allowtransparency="true" frameborder="0" scrolling="0" width="110" height="20"></iframe>
+    <iframe src="http://ghbtns.com/github-btn.html?user=rendro&amp;repo=vintageJS&amp;type=fork&amp;count=true" allowtransparency="true" frameborder="0" scrolling="0" width="95" height="20"></iframe>
+  </div>
 
+  <div class="box">
+    <h2 class="title">How to use</h2>
+    <p class="content">You can decide to use vintageJS as a jQuery plugin or the vanilla version without any dependencies.</p>
+    <dl>
+      <dt>with jQuery 1.2.3+</dt>
+      <dd>
+        <pre><code>&lt;script src="//code.jquery.com/jquery-2.0.0.min.js"&gt;&lt;/script&gt;
+&lt;script src="jquery.vintage.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  var options = {
+      onError: function() {
+          alert('ERROR');
+      }
+  };
+  var effect = {
+      vignette: 0.6,
+      sepia: true
+  };
+  $('img#yourImage').vintage(options, effect);
+&lt;/script&gt;</code></pre>
+      </dd>
+      <dt>without dependencies (vanilla)</dt>
+      <dd>
+        <pre><code>&lt;script src="vintage.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  var img = document.getElementById('yourImage');
+  var options = {
+      onError: function() {
+          alert('ERROR');
+      }
+  };
+  var effect = {
+      vignette: 0.6,
+      sepia: true
+  };
+  new VintageJS(img, options, effect);
+&lt;/script&gt;</code></pre>
+      </dd>
+    </dl>
+  </div>
 
-	<script src="//code.jquery.com/jquery-2.0.0.min.js"></script>
-	<script src="assets/jquery.vintage.min.js"></script>
+  <div class="box">
+    <h2 class="title">Options</h2>
+    <div class="content">
+      <p>You can configure vintageJS with the following options:</p>
+      <table>
+        <tr>
+          <td><code>onStart</code></td>
+          <td>Callback function that is executed before the effect is calculated</td>
+        </tr>
+        <tr>
+          <td><code>onEnd</code></td>
+          <td>Callback function that is executed after the effect is renderd</td>
+        </tr>
+        <tr>
+          <td><code>onError</code></td>
+          <td>Callback function that is executed if any error occures</td>
+        </tr>
+        <tr>
+          <td><code>mime</code></td>
+          <td>Mime type of the output image. Default is <code>image/jpeg</code></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="box">
+    <h2 class="title">Effect options</h2>
+    <div class="content">
+      <p>In the <code>vintage.presets.js</code> file you find a few presets to see how the options work. If you have built a great effect by yourself, do not hesitate to send a pull request, I appreciate every contribution.</p>
+      <table>
+        <tr>
+          <th>Name</th>
+          <th>Value</th>
+          <th>Description</th>
+        </tr>
+        <tr>
+          <td><code>vignette</code></td>
+          <td><i>float</i> from 0 to 1</td>
+          <td>A black vignette a the edges of the image</td>
+        </tr>
+        <tr>
+          <td><code>lighten</code></td>
+          <td><i>float</i> from 0 to 1</td>
+          <td>Lighten the center of the image</td>
+        </tr>
+        <tr>
+          <td><code>desaturate</code></td>
+          <td><i>float</i> from 0 to 1</td>
+          <td>Desaturate the image</td>
+        </tr>
+        <tr>
+          <td><code>noise</code></td>
+          <td><i>integer</i></td>
+          <td>Add a noise to the image. The bigger the number the stronger the noise</td>
+        </tr>
+        <tr>
+          <td><code>sepia</code></td>
+          <td><i>boolean</i></td>
+          <td>Sepia effect</td>
+        </tr>
+        <tr>
+          <td><code>viewFinder</code></td>
+          <td><i>string</i>: path to image</td>
+          <td>Add a viewfinder image</td>
+        </tr>
+        <tr>
+          <td><code>screen</code></td>
+          <td><i>object</i></td>
+          <td>Screen in another color. The object must have the following structure: <pre><code>{
+  r: (int)[0-255],
+  g: (int)[0-255],
+  b: (int)[0-255],
+  a: (float):[0-1]
+}</code></pre>
+      <code>r,b,g</code> represent the color and <code>a</code> defines the strength of the screen.
+      </td>
+        </tr>
+        <tr>
+          <td><code>curves</code></td>
+          <td><i>object</i></td>
+          <td>Map one color value to another by providing an object with the properties <code>r,g,b</code> each containing an array with 256 enties for the color mapping: <pre><code>{
+  r: (intArray){256}[0-255],
+  g: (intArray){256}[0-255],
+  b: (intArray){256}[0-255]
+}</code></pre>
+      <code>r,b,g</code> representing the color and <code>a</code> defines the strength of the screen.
+      </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="box">
+    <h2 class="title">vintage-API</h2>
+    <div class="content">
+      <p>Every instance of vintageJS returns an API object to manipulate the image. In the jQuery version this API is stored in the data of the element and can be accessed in the following way:</p>
+      <code>var vjsAPI = $('#yourImage').data('vintageJS');</code>
+      <p>The API has the following two methods:</p>
+      <ul>
+        <li><code>vintage(effect)</code>: Render a new effect for the image. The current effect will be overwritten.</li>
+        <li><code>apply()</code>: Apply the current effect on the image. All further effects are rendered on the basis of the current state of the image. Use this method if you want to render multiple effects on one image.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="box">
+    <h2 class="title">Browser support</h2>
+    <div class="content">
+      <p>As vintageJS relies on the HTML5 canvas element it supports the following browsers:</p>
+      <ul>
+        <li>Mozilla Firefox</li>
+        <li>Google Chrome</li>
+        <li>Apple Safari</li>
+        <li>Opera</li>
+        <li>Internet Explorer 9+</li>
+      </ul>
+      <p>See more details on <a href="http://caniuse.com/canvas">canisue.com/canvas</a>.</p>
+    </div>
+  </div>
+  <script src="//code.jquery.com/jquery-2.0.0.min.js"></script>
+  <script src="assets/jquery.vintage.min.js"></script>
+  <script>less.refresh(1);</script>
 </body>
 </html>
