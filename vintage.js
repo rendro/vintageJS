@@ -15,10 +15,13 @@ var VintageJS = function(originalImage, opts, effect) {
       applyEffect,
       vintage,
       resources,
-      image,
       originalSrc,
       width,
       height,
+      _effect,
+      resourceName,
+      image   = new Image(),
+      tmpImg  = new Image(),
       canvas  = document.createElement('canvas'),
       ctx     = canvas.getContext('2d'),
       options = {
@@ -38,89 +41,90 @@ var VintageJS = function(originalImage, opts, effect) {
         sepia:      false
       };
 
+  image.onerror = options.onError;
+  image.onload = function() {
+    // set global variables
+    width = canvas.width = image.width;
+    height = canvas.height = image.height;
+
+    // load resources
+    loadResources();
+  };
+
+  tmpImg.onerror = options.onError;
+  tmpImg.onload = function() {
+    ctx.clearRect(0, 0, width, height);
+    ctx.drawImage(tmpImg, 0, 0, width, height);
+    (window.vjsImageCache || (window.vjsImageCache = {}))[resourceName] = ctx.getImageData(0, 0, width, height).data;
+    loadResources();
+  };
+
   applyEffect = function (effect) {
     options.onStart();
 
     // prepare effect options
-    var _effect = {};
+    _effect = {};
     for(var name in defaultEffect) {
       _effect[name] = effect[name] || defaultEffect[name];
     }
 
-    // load base image and
-    image = new Image();
-    image.onload = function() {
-      // set global variables
-      width = canvas.width = image.width;
-      height = canvas.height = image.height;
+    // define resources
+    resources = [];
+    if (!!_effect.viewFinder) {
+      resources.push(_effect.viewFinder);
+    }
 
-      // define resources
-      resources = [];
-      if (!!_effect.viewFinder) {
-        resources.push(_effect.viewFinder);
-      }
-
-      // load resources
-      loadResources(function() {
-        // calculate the effect
-        vintage(_effect);
-      });
-    };
-    image.onerror = options.onError;
-    image.src = originalSrc;
+    // load base image and trigger onload function
+    if (image.src == originalSrc) {
+      loadResources();
+    } else {
+      image.src = originalSrc;
+    }
   };
 
-  loadResources = function(cb) {
+  loadResources = function() {
     // call callback if all resources are loaded
     if (resources.length === 0) {
-      return cb();
+      return vintage();
     }
 
     // load next resource if the current one is already cached
-    var resource     = resources.pop(),
-        resourceName = [width, height, resource].join('-');
+    var resource     = resources.pop();
+    resourceName = [width, height, resource].join('-');
     if (window.vjsImageCache && window.vjsImageCache[resourceName]) {
-      return loadResources(cb);
+      return loadResources();
     }
 
     // load resource and put into cache
-    var tmpImg    = new Image();
-    tmpImg.onload = function() {
-      ctx.clearRect(0, 0, width, height);
-      ctx.drawImage(tmpImg, 0, 0, width, height);
-      (window.vjsImageCache || (window.vjsImageCache = {}))[resourceName] = ctx.getImageData(0, 0, width, height).data;
-      loadResources(cb);
-    };
-    tmpImg.onerror = options.onError;
     tmpImg.src = resource;
   };
 
-  vintage = function(effect) {
+  vintage = function() {
     var outerRadius, gradient, imageData;
 
     // draw image on canvas
     ctx.clearRect(0, 0, width, height);
     ctx.drawImage(image, 0, 0, width, height);
     // get gradient radius if vignette or lighten center are used
-    if (!!effect.vignette || !!effect.lighten) {
+    if (!!_effect.vignette || !!_effect.lighten) {
       outerRadius = Math.sqrt( Math.pow(width / 2, 2) + Math.pow(height / 2, 2) );
     }
 
     // vignette
-    if (!!effect.vignette) {
+    if (!!_effect.vignette) {
       ctx.globalCompositeOperation = 'source-over';
       gradient = ctx.createRadialGradient(width/2, height/2, 0, width/2, height/2, outerRadius);
       gradient.addColorStop(0, 'rgba(0,0,0,0)');
       gradient.addColorStop(0.5, 'rgba(0,0,0,0)');
-      gradient.addColorStop(1, ['rgba(0,0,0,', effect.vignette, ')'].join('') );
+      gradient.addColorStop(1, ['rgba(0,0,0,', _effect.vignette, ')'].join('') );
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, width, height);
     }
 
-    if (!!effect.lighten) {
+    if (!!_effect.lighten) {
       ctx.globalCompositeOperation = 'lighter';
       gradient = ctx.createRadialGradient(width/2, height/2, 0, width/2, height/2, outerRadius);
-      gradient.addColorStop(0, ['rgba(255,255,255,', effect.lighten, ')'].join('') );
+      gradient.addColorStop(0, ['rgba(255,255,255,', _effect.lighten, ')'].join('') );
       gradient.addColorStop(0.5, 'rgba(255,255,255,0)');
       gradient.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = gradient;
@@ -141,8 +145,8 @@ var VintageJS = function(originalImage, opts, effect) {
     _imageData = imageData.data,
     viewFinderImageData;
 
-    if (!!effect.viewFinder) {
-      viewFinderImageData = window.vjsImageCache[ [width, height, effect.viewFinder].join('-') ];
+    if (!!_effect.viewFinder) {
+      viewFinderImageData = window.vjsImageCache[ [width, height, _effect.viewFinder].join('-') ];
     }
 
     // loop backwards so the length has to be evaluated only once; --i is faster than ++i, i-- or i++
@@ -152,36 +156,36 @@ var VintageJS = function(originalImage, opts, effect) {
       idx = i << 2;
 
       // curves
-      if (!!effect.curves) {
-        _imageData[idx  ] = effect.curves.r[ _imageData[idx  ] ];
-        _imageData[idx+1] = effect.curves.g[ _imageData[idx+1] ];
-        _imageData[idx+2] = effect.curves.b[ _imageData[idx+2] ];
+      if (!!_effect.curves) {
+        _imageData[idx  ] = _effect.curves.r[ _imageData[idx  ] ];
+        _imageData[idx+1] = _effect.curves.g[ _imageData[idx+1] ];
+        _imageData[idx+2] = _effect.curves.b[ _imageData[idx+2] ];
       }
 
       // screen
-      if (!!effect.screen) {
-        _imageData[idx  ] = 255 - ((255 - _imageData[idx  ]) * (255 - effect.screen.r * effect.screen.a) / 255);
-        _imageData[idx+1] = 255 - ((255 - _imageData[idx+1]) * (255 - effect.screen.g * effect.screen.a) / 255);
-        _imageData[idx+2] = 255 - ((255 - _imageData[idx+2]) * (255 - effect.screen.b * effect.screen.a) / 255);
+      if (!!_effect.screen) {
+        _imageData[idx  ] = 255 - ((255 - _imageData[idx  ]) * (255 - _effect.screen.r * _effect.screen.a) / 255);
+        _imageData[idx+1] = 255 - ((255 - _imageData[idx+1]) * (255 - _effect.screen.g * _effect.screen.a) / 255);
+        _imageData[idx+2] = 255 - ((255 - _imageData[idx+2]) * (255 - _effect.screen.b * _effect.screen.a) / 255);
       }
 
       // noise
-      if (!!effect.noise) {
-        noise = effect.noise - Math.random() * effect.noise / 2;
+      if (!!_effect.noise) {
+        noise = _effect.noise - Math.random() * _effect.noise / 2;
         _imageData[idx  ] += noise;
         _imageData[idx+1] += noise;
         _imageData[idx+2] += noise;
       }
 
       // view finder
-      if (!!effect.viewFinder) {
+      if (!!_effect.viewFinder) {
         _imageData[idx  ] = _imageData[idx  ] * viewFinderImageData[idx  ] / 255;
         _imageData[idx+1] = _imageData[idx+1] * viewFinderImageData[idx+1] / 255;
         _imageData[idx+2] = _imageData[idx+2] * viewFinderImageData[idx+2] / 255;
       }
 
       // sepia
-      if (!!effect.sepia) {
+      if (!!_effect.sepia) {
         r = _imageData[idx  ];
         g = _imageData[idx+1];
         b = _imageData[idx+2];
@@ -191,11 +195,11 @@ var VintageJS = function(originalImage, opts, effect) {
       }
 
       // desaturate
-      if (!!effect.sepia) {
+      if (!!_effect.desaturate) {
         average = ( _imageData[idx  ] + _imageData[idx+1] + _imageData[idx+2] ) / 3;
-        _imageData[idx  ] += ((average - _imageData[idx  ]) * effect.desaturate);
-        _imageData[idx+1] += ((average - _imageData[idx+1]) * effect.desaturate);
-        _imageData[idx+2] += ((average - _imageData[idx+2]) * effect.desaturate);
+        _imageData[idx  ] += ((average - _imageData[idx  ]) * _effect.desaturate);
+        _imageData[idx+1] += ((average - _imageData[idx+1]) * _effect.desaturate);
+        _imageData[idx+2] += ((average - _imageData[idx+2]) * _effect.desaturate);
       }
 
       // check value range 0-255 and parse to int
@@ -205,6 +209,7 @@ var VintageJS = function(originalImage, opts, effect) {
         _imageData[idx+j] = ~~(_imageData[idx+j] > 255 ? 255 : _imageData[idx+j] < 0 ? 0 : _imageData[idx+j]);
       }
     }
+
     // write image data, finalize vintageJS
     ctx.putImageData(imageData, 0, 0);
     originalImage.src = ctx.canvas.toDataURL(options.mime);
