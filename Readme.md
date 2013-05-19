@@ -134,10 +134,22 @@ Every instance of vintageJS returns an API object to manipulate the image. In th
 
   var vjsAPI = $('#yourImage').data('vintageJS');
 
-The API has the following two methods:
+The API has the following three methods:
 
-* `vintage(effect)`: Render a new effect for the image. The current effect will be overwritten.
-* `apply()`: Apply the current effect on the image. All further effects are rendered on the basis of the current state of the image. Use this method if you want to render multiple effects on one image.
+<table>
+  <tr>
+    <td><code>vintage(effect)</code></td>
+    <td>Render a new effect for the image. The current effect will be overwritten.</td>
+  </tr>
+  <tr>
+    <td><code>apply()</code></td>
+    <td>Apply the current effect on the image. All further effects are rendered on the basis of the current state of the image. Use this method if you want to render multiple effects on one image.</td>
+  </tr>
+  <tr>
+    <td><code>reset()</code></td>
+    <td>Reset the image to the original state (or the last applied state).</td>
+  </tr>
+</table>
 
 ## Browser support
 
@@ -150,3 +162,7 @@ As vintageJS relies on the HTML5 canvas element it supports the following browse
 * Internet Explorer 9+
 
 See more details on [canisue.com/canvas](http://caniuse.com/canvas).
+
+## Open Source License
+
+vintageJS is dual licensed under the [MIT](http://www.opensource.org/licenses/mit-license.php) and [GPL](http://www.opensource.org/licenses/gpl-license.php) licenses.

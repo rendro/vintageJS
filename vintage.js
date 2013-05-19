@@ -138,7 +138,8 @@ var VintageJS = function(originalImage, opts, effect) {
     average,
     sepiatone,
     noise,
-    _imageData = imageData.data;
+    _imageData = imageData.data,
+    viewFinderImageData;
 
     if (!!effect.viewFinder) {
       viewFinderImageData = window.vjsImageCache[ [width, height, effect.viewFinder].join('-') ];
@@ -223,6 +224,9 @@ var VintageJS = function(originalImage, opts, effect) {
   return {
     apply: function() {
       originalSrc = originalImage.src;
+    },
+    reset: function() {
+      originalImage.src = originalSrc;
     },
     vintage: applyEffect
   };

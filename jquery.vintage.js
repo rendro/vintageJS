@@ -139,7 +139,8 @@
         r,g,b, // for sepia
         average,
         noise,
-        _imageData = imageData.data;
+        _imageData = imageData.data,
+        viewFinderImageData;
 
         if (!!effect.viewFinder) {
           viewFinderImageData = window.vjsImageCache[ [width, height, effect.viewFinder].join('-') ];
@@ -224,6 +225,9 @@
       return {
         apply: function() {
           originalSrc = originalImage.src;
+        },
+        reset: function() {
+          originalImage.src = originalSrc;
         },
         vintage: applyEffect
       };
