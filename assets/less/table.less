@@ -1,3 +1,24 @@
 table{
 	width: 100%;
+	font-size: 13px;
+	border-collapse: collapse;
+	border-spacing: 0;
+	border: 1px solid #f6f6f6;
+	td,th{
+		padding: 10px 10px 4px;
+		border-bottom: 1px solid #f6f6f6;
+		border-right: 1px solid #f6f6f6;
+		vertical-align: top;
+		&:last-child{
+			border-left: none;
+		}
+	}
+	tr:nth-child(2n+1){
+		background: #fcfcfc;
+	}
+	tr:last-child{
+		td,th{
+			border-bottom: none;
+		}
+	}
 }
