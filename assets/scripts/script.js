@@ -41,11 +41,12 @@ $controls.on('change', 'select', function() {
   $select.trigger('change');
 });
 
-
-
 $slideshow.on('slideshow:change', function(e, $slide) {
   var effect = $slide.data('currEffect');
   $select.val(effect || '');
+  $reload.toggleClass(disabled, effect !== 'random');
 });
 
+// defer load twitter and github buttons
 $.getScript([(/^http:/.test(document.location)?'http':'https'),'://platform.twitter.com/widgets.js'].join(''));
+$('.ghbuttons .download').after('<iframe src="http://ghbtns.com/github-btn.html?user=rendro&amp;repo=vintageJS&amp;type=watch&amp;count=true" allowtransparency="true" frameborder="0" scrolling="0" width="110" height="20"></iframe><iframe src="http://ghbtns.com/github-btn.html?user=rendro&amp;repo=vintageJS&amp;type=fork&amp;count=true" allowtransparency="true" frameborder="0" scrolling="0" width="95" height="20"></iframe>');
