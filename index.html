@@ -4,9 +4,7 @@
   <meta charset="UTF-8">
   <title>vintageJS - add a retro/vintage effect to images using the HTML5 canvas element</title>
   <link href='http://fonts.googleapis.com/css?family=Exo:200,400' rel='stylesheet' type='text/css'/>
-  <!--<link rel="stylesheet" href="assets/styles/style.css"/>-->
-  <link rel="stylesheet/less" type="text/css" href="assets/styles/less/style.less" />
-  <script src="https://raw.github.com/cloudhead/less.js/master/dist/less-1.3.3.min.js"></script>
+  <link rel="stylesheet" href="assets/styles/style.css"/>
   <script src="assets/scripts/modernizr-2.6.2.js"></script>
 </head>
 <body>
@@ -37,6 +35,7 @@
         <option value="">No effect</option>
         <optgroup label="--------------------"></optgroup>
       </select>
+      <span class="js_reload disabled">&#8635;</span>
     </form>
     <div class="slideshow js_slideshow">
       <ul>
@@ -191,7 +190,7 @@
     <div class="content">
       <p>Every instance of vintageJS returns an API object to manipulate the image. In the jQuery version this API is stored in the data of the element and can be accessed in the following way:</p>
       <pre><code>var vjsAPI = $('#yourImage').data('vintageJS');</code></pre>
-      <p>The API has the following two methods:</p>
+      <p>The API has the following three methods:</p>
       <table>
         <tr>
           <td><code>vintage(effect)</code></td>
@@ -200,6 +199,10 @@
         <tr>
           <td><code>apply()</code></td>
           <td>Apply the current effect on the image. All further effects are rendered on the basis of the current state of the image. Use this method if you want to render multiple effects on one image.</td>
+        </tr>
+        <tr>
+          <td><code>reset()</code></td>
+          <td>Reset the image to the original state (or the last applied state).</td>
         </tr>
       </table>
     </div>
@@ -219,52 +222,19 @@
       <p>See more details on <a href="http://caniuse.com/canvas">canisue.com/canvas</a>.</p>
     </div>
   </div>
+
+  <div class="box">
+    <h3 class="title">Open Source License</h3>
+    <p class="content">
+      vintageJS is dual licensed under the <a href="http://www.opensource.org/licenses/mit-license.php" target="_blank">MIT</a> and <a href="http://www.opensource.org/licenses/gpl-license.php" target="_blank">GPL</a> licenses.
+    </p>
+  </div>
+
+  <div class="copyright">
+    built with <span>&#10084;</span> by <a href="http://rendro.de" target="_blank">Robert Fleischmann</a>
+  </div>
+
   <script src="//code.jquery.com/jquery-2.0.0.min.js"></script>
-  <script src="assets/scripts/slideshow.js"></script>
-  <script src="assets/scripts/jquery.vintage.js"></script>
-  <script src="assets/scripts/vintage.presets.js"></script>
-  <script>
-  less.refresh(1);
-
-  var active     = 'active',
-      click      = 'click',
-      $slideshow = $('.js_slideshow'),
-      $controls  = $('.js_controls'),
-      $select    = $controls.find('select'),
-      slideshow  = new Slideshow( $slideshow );
-
-  $('.js_toggle').on(click, 'dt', function() {
-    $(this).addClass(active).siblings('dt').removeClass(active);
-  });
-
-  // add a vintage API to each image in the slideshow
-  $slideshow.find('img').vintage();
-
-  //setup dropdown
-  $.each(vintagePresets, function(idx, effect) {
-    $select.append( ['<option value="', idx, '">', [idx.charAt(0).toUpperCase(), idx.substr(1)].join(''), '</option>'].join('') );
-  });
-
-  $controls.on('change', 'select', function() {
-    var selectedEffect = this.value,
-        currSlide      = slideshow.getCurrentSlide(),
-        vjsApi         = currSlide.find('img').data('vintageJS');
-    if (selectedEffect in vintagePresets) {
-      currSlide.data('currEffect', selectedEffect);
-      vjsApi.vintage( vintagePresets[ selectedEffect ] );
-    } else {
-      currSlide.data('currEffect', false);
-      vjsApi.reset();
-    }
-  });
-
-  $slideshow.on('slideshow:change', function(e, $slide) {
-    var effect = $slide.data('currEffect');
-    $select.val(effect || '');
-  });
-
-  $.getScript([(/^http:/.test(document.location)?'http':'https'),'://platform.twitter.com/widgets.js'].join(''));
-
-  </script>
+  <script src="assets/scripts/minified.js"></script>
 </body>
 </html>

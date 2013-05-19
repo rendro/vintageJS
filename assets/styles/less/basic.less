@@ -35,15 +35,36 @@ ul{
 }
 .controls{
 	margin: 10px 0;
+	text-align: center;
 	select{
-		display: block;
+		display: inline-block;
+		vertical-align: middle;
 		outline: none;
 		width: 300px;
-		margin: auto;
 		padding: 6px;
 		.border-radius(2px);
 		border: 2px solid @blue-2;
 		background: transparent;
+	}
+	.js_reload{
+		position: absolute;
+		margin-top: 6px;
+		margin-left: 15px;
+		cursor: pointer;
+		padding: 2px 6px;
+		font: normal 20px/1 'Arial', 'Helvetica', sans-serif;
+		.transition(all .3s ease-in-out);
+		&:hover{
+			color: @blue-1;
+		}
+		&.disabled{
+			visibility: hidden;
+			.pointerevents &{
+				visibility: visible;
+				opacity: 0;
+				pointer-events: none;
+			}
+		}
 	}
 }
 @media (-webkit-min-device-pixel-ratio: 0) {
@@ -54,4 +75,8 @@ ul{
 		-webkit-appearance: none;
 		padding: 6px 18px 6px 6px;
 	}
+}
+.copyright{
+	font-size: 13px;
+	text-align: center;
 }
