@@ -13,7 +13,7 @@ var Slideshow = function($node) {
     if ($this.hasClass(active)) { return; }
     $this.siblings( ['.',active].join('') ).addBack().toggleClass('active');
     currIdx = $this.index();
-    $node.trigger('slideshow:change', $this);
+    $node.trigger('slideshow:change', [$this]);
   }).on(click, '.js_next', function() {
     slide();
   }).on(click, '.js_prev', function() {
