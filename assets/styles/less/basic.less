@@ -33,3 +33,25 @@ ul{
 	padding-left: 1.5em;
 	margin-bottom: @base-lineheight;
 }
+.controls{
+	margin: 10px 0;
+	select{
+		display: block;
+		outline: none;
+		width: 300px;
+		margin: auto;
+		padding: 6px;
+		.border-radius(2px);
+		border: 2px solid @blue-2;
+		background: transparent;
+	}
+}
+@media (-webkit-min-device-pixel-ratio: 0) {
+	.controls select {
+		background-image: url("data:image/png;base64,R0lGODlhDQAEAIAAAAAAAP8A/yH5BAEHAAEALAAAAAANAAQAAAILhA+hG5jMDpxvhgIAOw==");
+		background-position: 100% 50%;
+		background-repeat: no-repeat;
+		-webkit-appearance: none;
+		padding: 6px 18px 6px 6px;
+	}
+}
