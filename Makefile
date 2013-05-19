@@ -7,6 +7,6 @@ dist:
 	rm -r assets/scripts/concat.js
 
 	@echo Compile LESS
-	lessc assets/styles/less/style.less > assets/styles/style.css
+	lessc --yui-compress assets/styles/less/style.less > assets/styles/style.css
 
 .PHONY: dist
