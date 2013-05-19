@@ -7,6 +7,7 @@
   <!--<link rel="stylesheet" href="assets/style.css"/>-->
   <link rel="stylesheet/less" type="text/css" href="assets/less/style.less" />
   <script src="https://raw.github.com/cloudhead/less.js/master/dist/less-1.3.3.min.js"></script>
+  <script src="assets/modernizr-2.6.2.js"></script>
 </head>
 <body>
 
@@ -29,44 +30,57 @@
   </div>
 
   <div class="box">
+    <h2 class="title">Demo</h2>
+    <ul class="slideshow js_slideshow">
+      <li class="active"><img src="assets/images/beach.jpg" alt=""></li>
+      <li><img src="assets/images/city.jpg" alt=""></li>
+      <li><img src="assets/images/hall.jpg" alt=""></li>
+      <li><img src="assets/images/landscape.jpg" alt=""></li>
+      <li><img src="assets/images/portrait.jpg" alt=""></li>
+    </ul>
+  </div>
+
+  <div class="box">
     <h2 class="title">How to use</h2>
-    <p class="content">You can decide to use vintageJS as a jQuery plugin or the vanilla version without any dependencies.</p>
-    <dl>
-      <dt>with jQuery 1.2.3+</dt>
-      <dd>
-        <pre><code>&lt;script src="//code.jquery.com/jquery-2.0.0.min.js"&gt;&lt;/script&gt;
+    <div class="content">
+      <p>You can decide to use vintageJS as a jQuery plugin or the vanilla version without any dependencies.</p>
+      <dl class="js_toggle">
+        <dt class="active">with jQuery</dt>
+        <dd>
+          <pre><code>&lt;script src="//code.jquery.com/jquery-2.0.0.min.js"&gt;&lt;/script&gt;
 &lt;script src="jquery.vintage.js"&gt;&lt;/script&gt;
 &lt;script&gt;
-  var options = {
-      onError: function() {
-          alert('ERROR');
-      }
-  };
-  var effect = {
-      vignette: 0.6,
-      sepia: true
-  };
-  $('img#yourImage').vintage(options, effect);
+    var options = {
+        onError: function() {
+            alert('ERROR');
+        }
+    };
+    var effect = {
+        vignette: 0.6,
+        sepia: true
+    };
+    $('img#yourImage').vintage(options, effect);
 &lt;/script&gt;</code></pre>
-      </dd>
-      <dt>without dependencies (vanilla)</dt>
-      <dd>
-        <pre><code>&lt;script src="vintage.js"&gt;&lt;/script&gt;
+        </dd>
+        <dt>without dependencies (vanilla)</dt>
+        <dd>
+          <pre><code>&lt;script src="vintage.js"&gt;&lt;/script&gt;
 &lt;script&gt;
-  var img = document.getElementById('yourImage');
-  var options = {
-      onError: function() {
-          alert('ERROR');
-      }
-  };
-  var effect = {
-      vignette: 0.6,
-      sepia: true
-  };
-  new VintageJS(img, options, effect);
+    var img = document.getElementById('yourImage');
+    var options = {
+        onError: function() {
+            alert('ERROR');
+        }
+    };
+    var effect = {
+        vignette: 0.6,
+        sepia: true
+    };
+    new VintageJS(img, options, effect);
 &lt;/script&gt;</code></pre>
-      </dd>
-    </dl>
+        </dd>
+      </dl>
+    </div>
   </div>
 
   <div class="box">
@@ -165,12 +179,18 @@
     <h2 class="title">vintage-API</h2>
     <div class="content">
       <p>Every instance of vintageJS returns an API object to manipulate the image. In the jQuery version this API is stored in the data of the element and can be accessed in the following way:</p>
-      <code>var vjsAPI = $('#yourImage').data('vintageJS');</code>
+      <pre><code>var vjsAPI = $('#yourImage').data('vintageJS');</code></pre>
       <p>The API has the following two methods:</p>
-      <ul>
-        <li><code>vintage(effect)</code>: Render a new effect for the image. The current effect will be overwritten.</li>
-        <li><code>apply()</code>: Apply the current effect on the image. All further effects are rendered on the basis of the current state of the image. Use this method if you want to render multiple effects on one image.</li>
-      </ul>
+      <table>
+        <tr>
+          <td><code>vintage(effect)</code></td>
+          <td>Render a new effect for the image. The current effect will be overwritten.</td>
+        </tr>
+        <tr>
+          <td><code>apply()</code></td>
+          <td>Apply the current effect on the image. All further effects are rendered on the basis of the current state of the image. Use this method if you want to render multiple effects on one image.</td>
+        </tr>
+      </table>
     </div>
   </div>
 
@@ -190,6 +210,18 @@
   </div>
   <script src="//code.jquery.com/jquery-2.0.0.min.js"></script>
   <script src="assets/jquery.vintage.min.js"></script>
-  <script>less.refresh(1);</script>
+  <script>
+  less.refresh(1);
+
+  var active = 'active';
+
+  $('.js_toggle').on('click', 'dt', function() {
+    $(this).addClass(active).siblings('dt').removeClass(active);
+  });
+  $('.js_slideshow').on('click', 'li', function() {
+    !$(this).hasClass(active) && $(this).siblings( ['.',active].join('') ).addBack().toggleClass('active');
+  });
+
+  </script>
 </body>
 </html>
