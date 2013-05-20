@@ -166,3 +166,17 @@ See more details on [canisue.com/canvas](http://caniuse.com/canvas).
 ## Open Source License
 
 vintageJS is dual licensed under the [MIT](http://www.opensource.org/licenses/mit-license.php) and [GPL](http://www.opensource.org/licenses/gpl-license.php) licenses.
+
+## Changelog
+
+### Version 1.1.1 - <small>May 20, 2013</small>
+* performance improvements
+* new effect options:
+    * brightness
+    * contrast
+
+### Version 1.1.0 - <small>May 19, 2013</small>
+* New and faster core
+
+### Version 1.0.0 - <small>Mar 17, 2011</small>
+* Initial release

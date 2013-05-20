@@ -3,7 +3,7 @@
  *
  * @license Dual licensed under the MIT (http://www.opensource.org/licenses/mit-license.php) and GPL (http://www.opensource.org/licenses/gpl-license.php) licenses.
  * @author Robert Fleischmann
- * @version 1.1.0
+ * @version 1.1.1
  */
 ;(function($, window, document, undefined) {
   'use strict';
@@ -40,7 +40,9 @@
             lighten:    false,
             noise:      false,
             viewFinder: false,
-            sepia:      false
+            sepia:      false,
+            brightness: false,
+            contrast:   false
           };
 
       image.onerror = options.onError;
@@ -162,6 +164,20 @@
             _imageData[idx  ] = _effect.curves.r[ _imageData[idx  ] ];
             _imageData[idx+1] = _effect.curves.g[ _imageData[idx+1] ];
             _imageData[idx+2] = _effect.curves.b[ _imageData[idx+2] ];
+          }
+
+          // contrast
+          if (!!_effect.contrast && _effect.contrast !== 1) {
+            _imageData[idx  ] *= _effect.contrast;
+            _imageData[idx+1] *= _effect.contrast;
+            _imageData[idx+2] *= _effect.contrast;
+          }
+
+          // brightness
+          if (!!_effect.brightness) {
+            _imageData[idx  ] += _effect.brightness;
+            _imageData[idx+1] += _effect.brightness;
+            _imageData[idx+2] += _effect.brightness;
           }
 
           // screen
