@@ -74,6 +74,16 @@ In the `vintage.presets.js` file you find a few presets to see how the options w
         <th>Description</th>
     </tr>
     <tr>
+        <td><code>brightness</code></td>
+        <td><i>integer</i> from -255 to 255</td>
+        <td>Change the brightness of the image</td>
+    </tr>
+    <tr>
+        <td><code>contrast</code></td>
+        <td><i>integer</i> from -255 to 255</td>
+        <td>Increase or decrease the contrast of the image</td>
+    </tr>
+    <tr>
         <td><code>vignette</code></td>
         <td><i>float</i> from 0 to 1</td>
         <td>A black vignette a the edges of the image</td>
