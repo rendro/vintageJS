@@ -6,7 +6,6 @@
  * @version 1.1.1
  */
 var VintageJS = function(originalImage, opts, effect) {
-  'use strict';
   if (false === (originalImage instanceof HTMLImageElement)) {
     throw 'The element (1st parameter) must be an instance of HTMLImageElement';
   }
@@ -145,7 +144,12 @@ var VintageJS = function(originalImage, opts, effect) {
     sepiatone,
     noise,
     _imageData = imageData.data,
-    viewFinderImageData;
+    viewFinderImageData,
+    contrastFactor;
+
+    if (!!_effect.contrast) {
+      contrastFactor = (259 * (_effect.contrast + 255)) / (255 * (259 - _effect.contrast));
+    }
 
     if (!!_effect.viewFinder) {
       viewFinderImageData = window.vjsImageCache[ [width, height, _effect.viewFinder].join('-') ];
@@ -165,10 +169,10 @@ var VintageJS = function(originalImage, opts, effect) {
       }
 
       // contrast
-      if (!!_effect.contrast && _effect.contrast !== 1) {
-        _imageData[idx  ] *= _effect.contrast;
-        _imageData[idx+1] *= _effect.contrast;
-        _imageData[idx+2] *= _effect.contrast;
+      if (!!_effect.contrast) {
+        _imageData[idx  ] = contrastFactor * (_imageData[idx  ] - 128) + 128;
+        _imageData[idx+1] = contrastFactor * (_imageData[idx+1] - 128) + 128;
+        _imageData[idx+2] = contrastFactor * (_imageData[idx+2] - 128) + 128;
       }
 
       // brightness
