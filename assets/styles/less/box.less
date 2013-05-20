@@ -3,9 +3,6 @@
 	width: @wideBoxWidth;
 	text-align: left;
 	.white-box;
-	.homepage &{
-		width: @smallBoxWidth;
-	}
 	.title{
 		display: block;
 		padding: 20px;
@@ -13,12 +10,6 @@
 		font: 200 20px/1 @alt-fontfamily;
 		text-align: center;
 		.box-shadow(0 1px rgba(0,0,0,0.1));
-	}
-	a.title{
-		.transition(color @short ease-in-out);
-		&:hover{
-			color: @linkColorHover;
-		}
 	}
 	.content{
 		padding: 20px;
