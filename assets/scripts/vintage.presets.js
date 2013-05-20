@@ -3,6 +3,7 @@ var vintagePresets = {
    * Basic vintage effect
    */
   vintage: {
+    contrast: 15,
     curves: (function() {
       var rgb = function (x) {
         return -12 * Math.sin( x * 2 * Math.PI / 255 ) + x;
@@ -37,6 +38,7 @@ var vintagePresets = {
    * Sepia effect
    */
   sepia: {
+    contrast: 12,
     curves: (function() {
       var rgb = function (x) {
         return -12 * Math.sin( x * 2 * Math.PI / 255 ) + x;
@@ -141,15 +143,17 @@ var vintagePresets = {
         r: Math.floor( Math.random() * 255 ),
         g: Math.floor( Math.random() * 255 ),
         b: Math.floor( Math.random() * 255 ),
-        a: Math.random()
+        a: Math.random()*0.4
       };
     };
     return {
+      contrast:   30-Math.floor(Math.random() * 60),
+      brightness: 30-Math.floor(Math.random() * 60),
       curves:     curves(),
       screen:     screen(),
       desaturate: Math.random(),
       vignette:   Math.random(),
-      lighten:    Math.random(),
+      lighten:    Math.random() * 0.3,
       noise:      Math.floor(Math.random() * 50),
       viewFinder: viewFinders[ Math.floor( Math.random() * viewFinders.length ) ],
       sepia:      (Math.random() >= 0.5)
