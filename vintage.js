@@ -6,10 +6,12 @@
  * @version 1.1.1
  */
 var VintageJS = function(originalImage, opts, effect) {
+
   if (false === (originalImage instanceof HTMLImageElement)) {
     throw 'The element (1st parameter) must be an instance of HTMLImageElement';
   }
-
+  
+   
   var loadResources,
       applyEffect,
       vintage,

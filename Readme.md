@@ -40,6 +40,19 @@ The jQuery version works with `jQuery 1.2.3+`
         new VintageJS(img, options, effect);
     </script>
 
+### AngularJs
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>
+    <script src="angular.vintage.js"></script>
+    <script>
+        var app = angular.module('app',['vintagejs']);
+    </script>
+
+And the html...
+    
+    <img vintage="option:value;option:value;.." src="picture.jpg" />
+
+
 ## Options
 
 You can configure vintageJS with the following options:
