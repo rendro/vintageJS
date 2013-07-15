@@ -50,7 +50,7 @@ You can configure vintageJS with the following options:
         <td>Callback function that is executed before the effect is calculated</td>
     </tr>
     <tr>
-        <td><code>onEnd</code></td>
+        <td><code>onStop</code></td>
         <td>Callback function that is executed after the effect is renderd</td>
     </tr>
     <tr>
