@@ -133,7 +133,7 @@ In the `vintage.presets.js` file you find a few presets to see how the options w
     g: (intArray){256}[0-255],
     b: (intArray){256}[0-255]
 }</code></pre>
-<code>r,b,g</code> representing the color and <code>a</code> defines the strength of the screen.
+<code>r,b,g</code> representing the color channels
 </td>
     </tr>
 </table>
