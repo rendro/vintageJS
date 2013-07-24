@@ -5,8 +5,8 @@ dl{
 	dt{
 		position: absolute;
 		top: 0;
-		left: 50%;
-		width: 50%;
+		left: 33.5%;
+		width: 33%;
 		height: @headerHeight;
 		line-height: @headerHeight;
 		text-align: center;
@@ -25,6 +25,10 @@ dl{
 		}
 		&:first-child{
 			left: 0;
+		}
+		&:last-of-type{
+			left: auto;
+			right: 0;
 		}
 		&.active{
 			background: @blue-1;

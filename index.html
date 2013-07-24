@@ -53,7 +53,7 @@
   <div class="box">
     <h3 class="title">How to use</h3>
     <div class="content">
-      <p>You can decide to use vintageJS as a jQuery plugin or the vanilla version without any dependencies.</p>
+      <p>You can decide to use vintageJS as a jQuery plugin, as an <a href="http://angularjs.org/" target="_blank">AngularJS</a> module or implement the vanilla version without any dependencies.</p>
       <dl class="js_toggle">
         <dt class="active">with jQuery</dt>
         <dd>
@@ -88,6 +88,17 @@
     };
     new VintageJS(img, options, effect);
 &lt;/script&gt;</code></pre>
+        </dd>
+        <dt>AngularJS</dt>
+        <dd>
+          <pre><code>
+&lt;img vintage="option:value;option:value;.." src="picture.jpg" /&gt;
+&lt;script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"&gt;&lt;/script&gt;
+&lt;script src="angular.vintage.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+    var app = angular.module('app',['vintagejs']);
+&lt;/script&gt;
+          </code></pre>
         </dd>
       </dl>
     </div>
