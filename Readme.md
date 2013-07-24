@@ -193,7 +193,7 @@ vintageJS is dual licensed under the [MIT](http://www.opensource.org/licenses/mi
 ## Changelog
 
 ### Version 1.1.2 - <small>July 24, 2013</small>
-* added AngularJS support thanks to @dpiccone
+* added AngularJS support thanks to [@dpiccone](https://github.com/dpiccone)
 * grunt based build script for all versions
 
 ### Version 1.1.1 - <small>May 20, 2013</small>
