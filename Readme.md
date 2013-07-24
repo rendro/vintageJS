@@ -2,7 +2,7 @@
 Add a retro/vintage effect to images using the HTML5 canvas element.
 
 ## How to use
-You can decide to use vintageJS as a jQuery plugin or the vanilla version without any dependencies.
+You can decide to use vintageJS as a jQuery plugin, as an [AngularJS](http://angularjs.org/) module or implement the vanilla version without any dependencies.
 
 ### jQuery
 
@@ -49,7 +49,7 @@ The jQuery version works with `jQuery 1.2.3+`
     </script>
 
 And the html...
-    
+
     <img vintage="option:value;option:value;.." src="picture.jpg" />
 
 
@@ -191,6 +191,10 @@ See more details on [canisue.com/canvas](http://caniuse.com/canvas).
 vintageJS is dual licensed under the [MIT](http://www.opensource.org/licenses/mit-license.php) and [GPL](http://www.opensource.org/licenses/gpl-license.php) licenses.
 
 ## Changelog
+
+### Version 1.1.2 - <small>July 24, 2013</small>
+* added AngularJS support thanks to @dpiccone
+* grunt based build script for all versions
 
 ### Version 1.1.1 - <small>May 20, 2013</small>
 * performance improvements
