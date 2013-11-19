@@ -38,8 +38,6 @@ var VintageJS = function(originalImage, opts, effect) {
 
   image.onerror = options.onError;
 
-  image.crossOrigin = "Anonymous";
-
   image.onload = function() {
     // set global variables
     width = canvas.width = image.width;
