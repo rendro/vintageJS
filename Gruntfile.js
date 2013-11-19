@@ -3,16 +3,30 @@ module.exports = function(grunt) {
     // Project configuration.
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
+        banner: '/**!\n' +
+                ' * <%= pkg.name %>\n' +
+                ' * <%= pkg.description %>\n' +
+                ' *\n' +
+                ' * @license <%= pkg.license %>\n'+
+                ' * @author <%= pkg.author.name %> <<%= pkg.author.email %>>\n' +
+                ' * @version <%= pkg.version %>\n' +
+                ' **/\n\n',
+        uglify: {
+            all: {
+                options: {
+                    banner: '<%= banner %>',
+                    report: 'gzip'
+                },
+                files: {
+                    'dist/angular.vintage.min.js': 'dist/angular.vintage.js',
+                    'dist/jquery.vintage.min.js': 'dist/jquery.vintage.js',
+                    'dist/vintage.min.js': 'dist/vintage.js'
+                }
+            }
+        },
         concat: {
             options: {
-                banner: '/**!\n' +
-                        ' * <%= pkg.name %>\n' +
-                        ' * <%= pkg.description %>\n' +
-                        ' *\n' +
-                        ' * @license <%= pkg.license %>\n'+
-                        ' * @author <%= pkg.author.name %> <<%= pkg.author.email %>>\n' +
-                        ' * @version <%= pkg.version %>\n' +
-                        ' **/\n\n'
+                banner: '<%= banner %>'
             },
             angular: {
                 src: [
@@ -36,11 +50,11 @@ module.exports = function(grunt) {
         }
     });
 
-    // Load the plugin that provides the "uglify" task.
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-banner');
+    grunt.loadNpmTasks('grunt-contrib-uglify');
 
     // Default task(s).
-    grunt.registerTask('default', ['concat']);
+    grunt.registerTask('default', ['concat', 'uglify']);
 
 };
