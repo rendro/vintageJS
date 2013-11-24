@@ -4,12 +4,19 @@
  *
  * @license Dual licensed under the MIT (http://www.opensource.org/licenses/mit-license.php) and GPL (http://www.opensource.org/licenses/gpl-license.php) licenses.
  * @author Robert Fleischmann <rendro87@gmail.com>
- * @version 1.1.3
+ * @version 1.1.4
  **/
-
-;(function($, window, document, undefined) {
-  $.fn.vintage = function(options, effect) {
-
+(function(root, factory) {
+    if(typeof exports === 'object') {
+        module.exports = factory(require('jquery'));
+    }
+    else if(typeof define === 'function' && define.amd) {
+        define('vintagejs', ['jquery'], factory);
+    }
+    else {
+        root['VintageJS'] = factory(root.jQuery);
+    }
+}(this, function($) {
 var VintageJS = function(originalImage, opts, effect) {
 
   if (false === (originalImage instanceof HTMLImageElement)) {
@@ -264,10 +271,13 @@ var VintageJS = function(originalImage, opts, effect) {
   };
 };
 
-      return this.each(function() {
-      if (!$.data(this, 'vintageJS')) {
-        $.data(this, 'vintageJS', new VintageJS( this, options, effect ));
-      }
-    });
-  };
-})(jQuery, window, document);
+$.fn.vintage = function(options, effect) {
+  return this.each(function() {
+    if (!$.data(this, 'vintageJS')) {
+      $.data(this, 'vintageJS', new VintageJS( this, options, effect ));
+    }
+  });
+};
+
+    return VintageJS;
+}));

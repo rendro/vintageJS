@@ -10,11 +10,11 @@ module.exports = function(grunt) {
                 ' * @license <%= pkg.license %>\n'+
                 ' * @author <%= pkg.author.name %> <<%= pkg.author.email %>>\n' +
                 ' * @version <%= pkg.version %>\n' +
-                ' **/\n\n',
+                ' **/',
+        clean: ['dist'],
         uglify: {
             all: {
                 options: {
-                    banner: '<%= banner %>',
                     report: 'gzip'
                 },
                 files: {
@@ -25,9 +25,6 @@ module.exports = function(grunt) {
             }
         },
         concat: {
-            options: {
-                banner: '<%= banner %>'
-            },
             angular: {
                 src: [
                     'src/angular.directive.js',
@@ -37,9 +34,8 @@ module.exports = function(grunt) {
             },
             jquery: {
                 src: [
-                    'src/jquery.header.js',
                     'src/vintage.js',
-                    'src/jquery.footer.js'
+                    'src/jquery.js'
                 ],
                 dest: 'dist/jquery.vintage.js'
             },
@@ -47,14 +43,61 @@ module.exports = function(grunt) {
                 src: ['src/vintage.js'],
                 dest: 'dist/vintage.js'
             }
+        },
+        umd: {
+            vanilla: {
+                src: '<%= concat.vanilla.dest %>',
+                objectToExport: 'VintageJS',
+                amdModuleId: 'vintagejs',
+                globalAlias: 'VintageJS'
+            },
+            jquery: {
+                src: '<%= concat.jquery.dest %>',
+                objectToExport: 'VintageJS',
+                amdModuleId: 'vintagejs',
+                globalAlias: 'VintageJS',
+                deps: {
+                    'default': ['$'],
+                    amd: ['jquery'],
+                    cjs: ['jquery'],
+                    global: ['jQuery']
+                }
+            },
+            angular: {
+                src: '<%= concat.angular.dest %>',
+                objectToExport: 'VintageJS',
+                amdModuleId: 'vintagejs',
+                globalAlias: 'VintageJS',
+                deps: {
+                    'default': ['angular']
+                }
+            }
+        },
+        usebanner: {
+            all: {
+                options: {
+                    banner: '<%= banner %>'
+                },
+                files: {
+                    srd: ['dist/*.js']
+                }
+            }
         }
     });
 
     grunt.loadNpmTasks('grunt-contrib-concat');
-    grunt.loadNpmTasks('grunt-banner');
     grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-contrib-clean');
+    grunt.loadNpmTasks('grunt-banner');
+    grunt.loadNpmTasks('grunt-umd');
 
     // Default task(s).
-    grunt.registerTask('default', ['concat', 'uglify']);
+    grunt.registerTask('default', [
+        'clean',
+        'concat',
+        'umd',
+        'uglify',
+        'usebanner'
+    ]);
 
 };
