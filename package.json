@@ -8,6 +8,7 @@
     "email": "rendro87@gmail.com",
     "url": "http://robert-fleischmann.de"
   },
+  "main": "./dist/vintage.js",
   "devDependencies": {
     "grunt": "*",
     "grunt-contrib-uglify": "*",
