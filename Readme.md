@@ -192,6 +192,9 @@ vintageJS is dual licensed under the [MIT](http://www.opensource.org/licenses/mi
 
 ## Changelog
 
+### Version 1.1.5 - <small>May 16, 2016</small>
+* Added "main" field to package.json
+
 ### Version 1.1.4 - <small>Oct 24, 2013</small>
 * Added universal module definition (umd) wrapper
 

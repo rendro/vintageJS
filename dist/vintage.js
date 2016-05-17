@@ -4,19 +4,24 @@
  *
  * @license Dual licensed under the MIT (http://www.opensource.org/licenses/mit-license.php) and GPL (http://www.opensource.org/licenses/gpl-license.php) licenses.
  * @author Robert Fleischmann <rendro87@gmail.com>
- * @version 1.1.4
+ * @version 1.1.5
  **/
-(function(root, factory) {
-    if(typeof exports === 'object') {
-        module.exports = factory();
-    }
-    else if(typeof define === 'function' && define.amd) {
-        define('vintagejs', [], factory);
-    }
-    else {
-        root['VintageJS'] = factory();
-    }
-}(this, function() {
+(function (root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    // AMD. Register as an anonymous module unless amdModuleId is set
+    define('vintagejs', [], function () {
+      return (root['VintageJS'] = factory());
+    });
+  } else if (typeof exports === 'object') {
+    // Node. Does not work with strict CommonJS, but
+    // only CommonJS-like environments that support module.exports,
+    // like Node.
+    module.exports = factory();
+  } else {
+    root['VintageJS'] = factory();
+  }
+}(this, function () {
+
 var VintageJS = function(originalImage, opts, effect) {
 
   if (false === (originalImage instanceof HTMLImageElement)) {
@@ -271,5 +276,6 @@ var VintageJS = function(originalImage, opts, effect) {
   };
 };
 
-    return VintageJS;
+return VintageJS;
+
 }));
