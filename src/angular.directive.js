@@ -15,7 +15,7 @@ if ( (typeof(angular) === 'object') && (typeof(angular.version) === 'object')){
                 };
                 var fx = attrs.vintage;
                 fx = fx.split(';'); // CSS like syntax
-                var REkey = new RegExp("[a-z]+");
+                var REkey = new RegExp("[a-zA-Z]+");
                 var REvalue = new RegExp(":.+");
                 // Parse Effects
                 effect = {};
