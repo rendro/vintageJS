@@ -88,7 +88,6 @@ const screenFn = sa => sc => c => 255 - (255 - c) * (255 - sc * sa) / 255;
 // _imageData[idx  ] += ((average - _imageData[idx  ]) * _effect.desaturate);
 const getLUT = effect => {
   const { curves, contrast, brightness, screen, sepia, saturation } = effect;
-  const id_arr = new Array(256).fill(1).map((_, idx) => idx);
   let rMod = idFn;
   let gMod = idFn;
   let bMod = idFn;
@@ -120,11 +119,13 @@ const getLUT = effect => {
     bMod = compose(f(screen.b), bMod);
   }
 
-  let r = id_arr.slice(0).map(rMod);
-  let g = id_arr.slice(0).map(gMod);
-  let b = id_arr.slice(0).map(bMod);
-  const a = id_arr.slice(0);
-  return [r, g, b, a];
+  const id_arr = new Array(256).fill(1).map((_, idx) => idx);
+  return [
+    id_arr.slice(0).map(rMod),
+    id_arr.slice(0).map(gMod),
+    id_arr.slice(0).map(bMod),
+    id_arr.slice(0),
+  ];
 };
 
 // const getVignette = (): string => {
@@ -146,8 +147,9 @@ export default (
     const LUT = getLUT(effect);
     const imageData = readSource(srcEl);
     const canvas = document.createElement('canvas');
-    canvas.width = srcEl.width;
-    canvas.height = srcEl.height;
+    const { width, height } = srcEl;
+    canvas.width = width;
+    canvas.height = height;
     const ctx = nullthrows(
       canvas.getContext('2d'),
       'Could not get 2d context for canvas',
@@ -155,7 +157,45 @@ export default (
     ctx.drawImage(srcEl, 0, 0, canvas.width, canvas.height);
     const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
     data.data.set(data.data.map((v, i) => LUT[i % 4][v]));
-    // Uint8ClampedArray
     ctx.putImageData(data, 0, 0);
+
+    if (effect.vignette) {
+      ctx.globalCompositeOperation = 'multiply';
+      if (ctx.globalCompositeOperation !== 'multiply') {
+        console.log('globalCompositeOperation fallback');
+        ctx.globalCompositeOperation = 'source-over';
+      }
+      const gradient = ctx.createRadialGradient(
+        width / 2,
+        height / 2,
+        0,
+        width / 2,
+        height / 2,
+        Math.sqrt(Math.pow(width / 2, 2) + Math.pow(height / 2, 2)),
+      );
+      gradient.addColorStop(0, 'rgba(0,0,0,0)');
+      gradient.addColorStop(0.5, 'rgba(0,0,0,0)');
+      gradient.addColorStop(1, `rgba(0,0,0,${effect.vignette})`);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, width, height);
+    }
+
+    if (effect.lighten) {
+      ctx.globalCompositeOperation = 'lighter';
+      const gradient = ctx.createRadialGradient(
+        width / 2,
+        height / 2,
+        0,
+        width / 2,
+        height / 2,
+        Math.sqrt(Math.pow(width / 2, 2) + Math.pow(height / 2, 2)),
+      );
+      gradient.addColorStop(0, `rgba(255,255,255,${effect.lighten})`);
+      gradient.addColorStop(0.5, 'rgba(255,255,255,0)');
+      gradient.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, width, height);
+    }
+
     resolve(canvas.toDataURL(IMAGE_TYPE, IMAGE_QUALITY));
   });

@@ -5,6 +5,8 @@ const resultImg = document.createElement('img');
 img.parentElement.appendChild(resultImg);
 
 vintagejs(img, {
+  vignette: 0.3,
+  lighten: 0.2,
   brightness: -0.1,
   contrast: 0.15,
   screen: {

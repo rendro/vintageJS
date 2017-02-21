@@ -12,6 +12,8 @@ var resultImg = document.createElement('img');
 img.parentElement.appendChild(resultImg);
 
 (0, _index2.default)(img, {
+  vignette: 0.3,
+  lighten: 0.2,
   brightness: -0.1,
   contrast: 0.15,
   screen: {
@@ -139,9 +141,6 @@ var getLUT = function getLUT(effect) {
       sepia = effect.sepia,
       saturation = effect.saturation;
 
-  var id_arr = new Array(256).fill(1).map(function (_, idx) {
-    return idx;
-  });
   var rMod = idFn;
   var gMod = idFn;
   var bMod = idFn;
@@ -173,11 +172,10 @@ var getLUT = function getLUT(effect) {
     bMod = compose(_f2(screen.b), bMod);
   }
 
-  var r = id_arr.slice(0).map(rMod);
-  var g = id_arr.slice(0).map(gMod);
-  var b = id_arr.slice(0).map(bMod);
-  var a = id_arr.slice(0);
-  return [r, g, b, a];
+  var id_arr = new Array(256).fill(1).map(function (_, idx) {
+    return idx;
+  });
+  return [id_arr.slice(0).map(rMod), id_arr.slice(0).map(gMod), id_arr.slice(0).map(bMod), id_arr.slice(0)];
 };
 
 // const getVignette = (): string => {
@@ -194,16 +192,43 @@ exports.default = function (srcEl, partialEffect) {
     var LUT = getLUT(effect);
     var imageData = readSource(srcEl);
     var canvas = document.createElement('canvas');
-    canvas.width = srcEl.width;
-    canvas.height = srcEl.height;
+    var width = srcEl.width,
+        height = srcEl.height;
+
+    canvas.width = width;
+    canvas.height = height;
     var ctx = (0, _nullthrows2.default)(canvas.getContext('2d'), 'Could not get 2d context for canvas');
     ctx.drawImage(srcEl, 0, 0, canvas.width, canvas.height);
     var data = ctx.getImageData(0, 0, canvas.width, canvas.height);
     data.data.set(data.data.map(function (v, i) {
       return LUT[i % 4][v];
     }));
-    // Uint8ClampedArray
     ctx.putImageData(data, 0, 0);
+
+    if (effect.vignette) {
+      ctx.globalCompositeOperation = 'multiply';
+      if (ctx.globalCompositeOperation !== 'multiply') {
+        console.log('globalCompositeOperation fallback');
+        ctx.globalCompositeOperation = 'source-over';
+      }
+      var gradient = ctx.createRadialGradient(width / 2, height / 2, 0, width / 2, height / 2, Math.sqrt(Math.pow(width / 2, 2) + Math.pow(height / 2, 2)));
+      gradient.addColorStop(0, 'rgba(0,0,0,0)');
+      gradient.addColorStop(0.5, 'rgba(0,0,0,0)');
+      gradient.addColorStop(1, 'rgba(0,0,0,' + effect.vignette + ')');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, width, height);
+    }
+
+    if (effect.lighten) {
+      ctx.globalCompositeOperation = 'lighter';
+      var _gradient = ctx.createRadialGradient(width / 2, height / 2, 0, width / 2, height / 2, Math.sqrt(Math.pow(width / 2, 2) + Math.pow(height / 2, 2)));
+      _gradient.addColorStop(0, 'rgba(255,255,255,' + effect.lighten + ')');
+      _gradient.addColorStop(0.5, 'rgba(255,255,255,0)');
+      _gradient.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = _gradient;
+      ctx.fillRect(0, 0, width, height);
+    }
+
     resolve(canvas.toDataURL(IMAGE_TYPE, IMAGE_QUALITY));
   });
 };
