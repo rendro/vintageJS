@@ -32,10 +32,19 @@ var b = function b(c) {
   return 0.57254902 * c + 53;
 };
 
-var curves = {
+var curves1 = {
   r: idArr.map(compose(r, rgb)),
   g: idArr.map(compose(g, rgb)),
   b: idArr.map(compose(b, rgb))
+};
+
+var rgb2 = function rgb2(c) {
+  return -12 * Math.sin(c * 2 * Math.PI / 255) + c;
+};
+var curves2 = {
+  r: idArr.map(rgb2),
+  g: idArr.map(rgb2),
+  b: idArr.map(rgb2)
 };
 
 (0, _index2.default)(img, {
@@ -43,7 +52,7 @@ var curves = {
   lighten: 0.2,
   brightness: -0.1,
   contrast: 0.15,
-  curves: curves,
+  curves: curves1,
   screen: {
     r: 227,
     g: 12,
