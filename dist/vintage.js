@@ -132,7 +132,7 @@ var getLUT = function getLUT(effect) {
   var id_arr = new Array(256).fill(1).map(function (_, idx) {
     return idx;
   });
-  return [id_arr.slice(0).map(rMod), id_arr.slice(0).map(gMod), id_arr.slice(0).map(bMod), id_arr.slice(0)];
+  return [id_arr.map(rMod), id_arr.map(gMod), id_arr.map(bMod), id_arr.slice(0)];
 };
 
 // const getVignette = (): string => {
@@ -145,6 +145,7 @@ var getLUT = function getLUT(effect) {
 
 exports.default = function (srcEl, partialEffect) {
   return new Promise(function (resolve, reject) {
+    console.time('effect');
     var effect = _extends({}, defaultEffect, partialEffect);
     var LUT = getLUT(effect);
     var imageData = readSource(srcEl);
@@ -185,7 +186,8 @@ exports.default = function (srcEl, partialEffect) {
       ctx.fillStyle = _gradient;
       ctx.fillRect(0, 0, width, height);
     }
-
-    resolve(canvas.toDataURL(IMAGE_TYPE, IMAGE_QUALITY));
+    var res = canvas.toDataURL(IMAGE_TYPE, IMAGE_QUALITY);
+    console.timeEnd('effect');
+    resolve(res);
   });
 };

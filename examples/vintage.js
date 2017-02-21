@@ -11,11 +11,39 @@ var img = document.getElementById('picture');
 var resultImg = document.createElement('img');
 img.parentElement.appendChild(resultImg);
 
+var compose = function compose(f, g) {
+  return function (x) {
+    return f(g(x));
+  };
+};
+var idArr = new Array(256).fill(1).map(function (_, i) {
+  return i;
+});
+var rgb = function rgb(c) {
+  return -12 * Math.sin(c * 2 * Math.PI / 255) + c;
+};
+var r = function r(c) {
+  return -0.2 * Math.sqrt(255 * c) * Math.sin(Math.PI * (-0.0000195 * c * c + 0.0125 * c)) + c;
+};
+var g = function g(c) {
+  return -0.001045244139166791 * c * c + 1.2665372554875318 * c;
+};
+var b = function b(c) {
+  return 0.57254902 * c + 53;
+};
+
+var curves = {
+  r: idArr.map(compose(r, rgb)),
+  g: idArr.map(compose(g, rgb)),
+  b: idArr.map(compose(b, rgb))
+};
+
 (0, _index2.default)(img, {
   vignette: 0.3,
   lighten: 0.2,
   brightness: -0.1,
   contrast: 0.15,
+  curves: curves,
   screen: {
     r: 227,
     g: 12,
@@ -175,7 +203,7 @@ var getLUT = function getLUT(effect) {
   var id_arr = new Array(256).fill(1).map(function (_, idx) {
     return idx;
   });
-  return [id_arr.slice(0).map(rMod), id_arr.slice(0).map(gMod), id_arr.slice(0).map(bMod), id_arr.slice(0)];
+  return [id_arr.map(rMod), id_arr.map(gMod), id_arr.map(bMod), id_arr.slice(0)];
 };
 
 // const getVignette = (): string => {
@@ -188,6 +216,7 @@ var getLUT = function getLUT(effect) {
 
 exports.default = function (srcEl, partialEffect) {
   return new Promise(function (resolve, reject) {
+    console.time('effect');
     var effect = _extends({}, defaultEffect, partialEffect);
     var LUT = getLUT(effect);
     var imageData = readSource(srcEl);
@@ -228,8 +257,9 @@ exports.default = function (srcEl, partialEffect) {
       ctx.fillStyle = _gradient;
       ctx.fillRect(0, 0, width, height);
     }
-
-    resolve(canvas.toDataURL(IMAGE_TYPE, IMAGE_QUALITY));
+    var res = canvas.toDataURL(IMAGE_TYPE, IMAGE_QUALITY);
+    console.timeEnd('effect');
+    resolve(res);
   });
 };
 

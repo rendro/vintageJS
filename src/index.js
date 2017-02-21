@@ -121,9 +121,9 @@ const getLUT = effect => {
 
   const id_arr = new Array(256).fill(1).map((_, idx) => idx);
   return [
-    id_arr.slice(0).map(rMod),
-    id_arr.slice(0).map(gMod),
-    id_arr.slice(0).map(bMod),
+    id_arr.map(rMod),
+    id_arr.map(gMod),
+    id_arr.map(bMod),
     id_arr.slice(0),
   ];
 };
@@ -140,6 +140,7 @@ export default (
   partialEffect: $Shape<Effect>,
 ): Promise<string> =>
   new Promise((resolve, reject) => {
+    console.time('effect');
     const effect = {
       ...defaultEffect,
       ...partialEffect,
@@ -196,6 +197,7 @@ export default (
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, width, height);
     }
-
-    resolve(canvas.toDataURL(IMAGE_TYPE, IMAGE_QUALITY));
+    const res = canvas.toDataURL(IMAGE_TYPE, IMAGE_QUALITY);
+    console.timeEnd('effect');
+    resolve(res);
   });
