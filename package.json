@@ -10,12 +10,23 @@
   },
   "main": "./src/index.js",
   "scripts": {
-    "build": "babel -o dist/vintage.js src/index.js"
+    "build": "babel -o dist/vintage.js src/index.js",
+    "examples": "browserify -e examples/example.js -t babelify -o examples/vintage.js",
+    "watch-examples": "watchify -v -e examples/example.js -t babelify -o examples/vintage.js"
+  },
+  "dependencies": {
+    "nullthrows": "^1.0.0"
   },
   "devDependencies": {
     "babel-cli": "^6.23.0",
     "babel-plugin-syntax-flow": "^6.18.0",
     "babel-plugin-transform-flow-strip-types": "^6.22.0",
-    "babel-preset-es2015": "^6.22.0"
+    "babel-preset-es2015": "^6.22.0",
+    "babel-preset-stage-0": "^6.22.0",
+    "babelify": "^7.3.0",
+    "browserify": "^14.1.0",
+    "flow-bin": "^0.39.0",
+    "flow-typed": "^2.0.0",
+    "watchify": "^3.9.0"
   }
 }
