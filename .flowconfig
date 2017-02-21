@@ -1,0 +1,12 @@
+[ignore]
+.*/node_modules/.*
+.*/dist/.*
+<PROJECT_ROOT>/Gruntfile.js
+<PROJECT_ROOT>/package.json
+<PROJECT_ROOT>/bower.json
+
+[include]
+
+[libs]
+
+[options]

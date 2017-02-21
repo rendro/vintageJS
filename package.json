@@ -10,11 +10,5 @@
   },
   "main": "./dist/vintage.js",
   "devDependencies": {
-    "grunt": "*",
-    "grunt-contrib-uglify": "*",
-    "grunt-contrib-concat": "*",
-    "grunt-banner": "*",
-    "grunt-umd": "https://github.com/alexlawrence/grunt-umd/archive/master.tar.gz",
-    "grunt-contrib-clean": "~0.5.0"
   }
 }
