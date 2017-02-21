@@ -23,7 +23,11 @@ const ctx = srcEl.getContext('2d');
 vintagejs(srcEl, { brightness: 0.2 })
   .then(
     result => {
-      ctx.drawImage(result, 0, 0, canvas.width, canvas.height);
+      const img = new Image();
+      img.src = result;
+      img.onload = () => {
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      };
     },
     error => {
       console.log(`Failed: ${error}`);
