@@ -76,18 +76,26 @@ const readSource = (el: SourceElement): string => {
 // const contrastFn = _ =>
 //   c => 259 * (c + 255) / (255 * (259 - c)) * (c - 128) + 128;
 
-const compose = (f, g) => x => f(g(x));
+type UnaryFn<A, B> = (a: A) => B;
+const compose = <T1, T2, R>(
+  f: UnaryFn<T2, R>,
+  g: UnaryFn<T1, T2>,
+): UnaryFn<T1, R> =>
+  x => f(g(x));
 
-const idFn = c => c;
-const curvesFn = curves => c => curves[c];
-const contrastFn = f =>
-  c => 259 * (f * 256 + 255) / (255 * (259 - f * 256)) * (c - 128) + 128;
-const brightnessFn = f => c => c + f * 256;
-const screenFn = sa => sc => c => 255 - (255 - c) * (255 - sc * sa) / 255;
+const idFn = (c: number): number => c;
+const curvesFn = (curves: Array<number>) => (c: number): number => curves[c];
+const contrastFn = (f: number) =>
+  (c: number): number =>
+    259 * (f * 256 + 255) / (255 * (259 - f * 256)) * (c - 128) + 128;
+const brightnessFn = (f: number) => (c: number): number => c + f * 256;
+const screenFn = (sa: number) =>
+  (sc: number) =>
+    (c: number): number => 255 - (255 - c) * (255 - sc * sa) / 255;
 
 // _imageData[idx  ] += ((average - _imageData[idx  ]) * _effect.desaturate);
-const getLUT = effect => {
-  const { curves, contrast, brightness, screen, sepia, saturation } = effect;
+const getLUT = (effect: Effect): Array<Array<number>> => {
+  const { curves, contrast, brightness, screen } = effect;
   let rMod = idFn;
   let gMod = idFn;
   let bMod = idFn;
@@ -127,12 +135,6 @@ const getLUT = effect => {
     id_arr.slice(0),
   ];
 };
-
-// const getVignette = (): string => {
-//   const { width, height } = canvas;
-//   ctx.clearRect(0, 0, width, height);
-//   // ctx.globalCompositeOperation = 'multiply';
-// };
 
 // ApplyEffect :: SourceElement -> $Shape<Effect> -> Promise<string>
 export default (
