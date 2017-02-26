@@ -48,18 +48,20 @@ var curves2 = {
 };
 
 (0, _index2.default)(img, {
-  vignette: 0.3,
-  lighten: 0.2,
+  vignette: 0.5,
+  lighten: 0.3,
   brightness: -0.1,
   contrast: 0.15,
-  curves: curves1,
+  curves: curves2,
   saturation: 0.7,
+  viewfinder: './film-1.jpg',
   screen: {
     r: 227,
     g: 12,
     b: 169,
     a: 0.15
-  }
+  },
+  sepia: true
 }).then(function (res) {
   return res.getDataURL();
 }).then(function (dataUri) {
@@ -87,6 +89,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -103,7 +107,7 @@ var defaultEffect = {
   saturation: 1,
   vignette: 0,
   lighten: 0,
-  viewFinder: false,
+  viewfinder: false,
   sepia: false,
   brightness: 0,
   contrast: 0
@@ -112,22 +116,24 @@ var defaultEffect = {
 var IMAGE_TYPE = 'image/jpeg';
 var IMAGE_QUALITY = 1;
 
-var createCanvasFromImage = function createCanvasFromImage(el) {
+var createCanvasAndCtxFromImage = function createCanvasAndCtxFromImage(el, width, height) {
   var canvas = document.createElement('canvas');
-  canvas.width = el.width;
-  canvas.height = el.height;
+  if (!width) width = el.width;
+  if (!height) height = el.height;
+  canvas.width = width;
+  canvas.height = height;
   var ctx = (0, _nullthrows2.default)(canvas.getContext('2d'), 'Could not get 2d context for canvas');
-  ctx.drawImage(el, 0, 0, el.width, el.height);
+  ctx.drawImage(el, 0, 0, width, height);
 
-  return canvas;
+  return [canvas, ctx];
 };
 
-var getCanvas = function getCanvas(el) {
+var getCanvasAndCtx = function getCanvasAndCtx(el) {
   if (el instanceof HTMLImageElement) {
-    return createCanvasFromImage(el);
+    return createCanvasAndCtxFromImage(el);
   }
   if (el instanceof HTMLCanvasElement) {
-    return el;
+    return [el, (0, _nullthrows2.default)(el.getContext('2d'), 'Could not get 2d context for canvas')];
   }
   throw new Error('Unsupported source element. Expected HTMLCanvasElement or HTMLImageElement, got ' + (typeof el === 'undefined' ? 'undefined' : _typeof(el)) + '.');
 };
@@ -215,22 +221,71 @@ var getLUT = function getLUT(effect) {
   return [id_arr.map(rMod), id_arr.map(gMod), id_arr.map(bMod)];
 };
 
+var loadImage = function loadImage(src) {
+  return new Promise(function (resolve, reject) {
+    var img = new Image();
+    img.onload = function () {
+      return resolve(img);
+    };
+    img.onerror = function (err) {
+      return reject(err);
+    };
+    img.src = src;
+  });
+};
+
+var loadImageWithCache = function () {
+  var cache = {};
+  return function (src) {
+    return cache[src] ? Promise.resolve(cache[src]) : loadImage(src).then(function (img) {
+      cache[src] = img;
+      return img;
+    });
+  };
+}();
+
+var getResult = function getResult(canvas) {
+  return {
+    getDataURL: function getDataURL() {
+      var mimeType = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : IMAGE_TYPE;
+      var quality = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : IMAGE_QUALITY;
+
+      return canvas.toDataURL(mimeType, quality);
+    },
+    getCanvas: function getCanvas() {
+      return canvas;
+    },
+    getImage: function getImage() {
+      var mimeType = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : IMAGE_TYPE;
+      var quality = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : IMAGE_QUALITY;
+
+      return loadImage(canvas.toDataURL(mimeType, quality));
+    }
+  };
+};
+
 // ApplyEffect :: SourceElement -> $Shape<Effect> -> Promise<string>
 
 exports.default = function (srcEl, partialEffect) {
   return new Promise(function (resolve, reject) {
     var effect = _extends({}, defaultEffect, partialEffect);
     var LUT = getLUT(effect);
-    var canvas = getCanvas(srcEl);
+
+    var _getCanvasAndCtx = getCanvasAndCtx(srcEl),
+        _getCanvasAndCtx2 = _slicedToArray(_getCanvasAndCtx, 2),
+        canvas = _getCanvasAndCtx2[0],
+        ctx = _getCanvasAndCtx2[1];
+
     var width = canvas.width,
         height = canvas.height;
 
-    var ctx = (0, _nullthrows2.default)(canvas.getContext('2d'), 'Could not get 2d context for canvas');
-
+    ctx.globalCompositeOperation = 'multiply';
+    var supportsBlendModes = ctx.globalCompositeOperation === 'multiply';
     var data = ctx.getImageData(0, 0, width, height);
     var id = data.data.slice(0);
     var sepia = effect.sepia,
-        saturation = effect.saturation;
+        saturation = effect.saturation,
+        viewfinder = effect.viewfinder;
 
 
     var r = void 0,
@@ -273,46 +328,42 @@ exports.default = function (srcEl, partialEffect) {
     ctx.putImageData(data, 0, 0);
 
     if (effect.vignette) {
-      ctx.globalCompositeOperation = 'multiply';
-      if (ctx.globalCompositeOperation !== 'multiply') {
-        ctx.globalCompositeOperation = 'source-over';
-      }
+      ctx.globalCompositeOperation = supportsBlendModes ? 'multiply' : 'source-over';
       ctx.fillStyle = getGradient(ctx, width, height, ['rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'rgba(0,0,0,' + effect.vignette + ')']);
       ctx.fillRect(0, 0, width, height);
     }
 
     if (effect.lighten) {
-      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalCompositeOperation = supportsBlendModes ? 'screen' : 'lighter';
       ctx.fillStyle = getGradient(ctx, width, height, ['rgba(255,255,255,' + effect.lighten + ')', 'rgba(255,255,255,0)', 'rgba(0,0,0,0)']);
       ctx.fillRect(0, 0, width, height);
     }
 
-    resolve({
-      getDataURL: function getDataURL() {
-        var mimeType = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : IMAGE_TYPE;
-        var quality = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : IMAGE_QUALITY;
+    if (!viewfinder) {
+      resolve(getResult(canvas));
+    } else {
+      return loadImageWithCache(viewfinder).then(function (img) {
+        if (supportsBlendModes) {
+          ctx.globalCompositeOperation = 'multiply';
+          ctx.drawImage(img, 0, 0, width, height);
+        } else {
+          var _createCanvasAndCtxFr = createCanvasAndCtxFromImage(img, width, height),
+              _createCanvasAndCtxFr2 = _slicedToArray(_createCanvasAndCtxFr, 2),
+              _ = _createCanvasAndCtxFr2[0],
+              vfCtx = _createCanvasAndCtxFr2[1];
 
-        return canvas.toDataURL(mimeType, quality);
-      },
-      getCanvas: function getCanvas() {
-        return canvas;
-      },
-      getImage: function getImage() {
-        var mimeType = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : IMAGE_TYPE;
-        var quality = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : IMAGE_QUALITY;
+          var _vfCtx$getImageData = vfCtx.getImageData(0, 0, width, height),
+              vfData = _vfCtx$getImageData.data;
 
-        return new Promise(function (res, rej) {
-          var img = new Image();
-          img.onload = function () {
-            return res(img);
-          };
-          img.onerror = function (err) {
-            return rej(err);
-          };
-          img.src = canvas.toDataURL(mimeType, quality);
-        });
-      }
-    });
+          var imageData = ctx.getImageData(0, 0, width, height);
+          imageData.data.set(imageData.data.map(function (v, i) {
+            return v * vfData[i] / 255;
+          }));
+          ctx.putImageData(imageData, 0, 0);
+        }
+        resolve(getResult(canvas));
+      });
+    }
   });
 };
 

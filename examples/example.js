@@ -29,19 +29,20 @@ const curves2 = {
 };
 
 vintagejs(img, {
-  vignette: 0.3,
-  lighten: 0.2,
+  vignette: 0.5,
+  lighten: 0.3,
   brightness: -0.1,
   contrast: 0.15,
-  curves: curves1,
+  curves: curves2,
   saturation: 0.7,
+  viewfinder: './film-1.jpg',
   screen: {
     r: 227,
     g: 12,
     b: 169,
     a: 0.15,
   },
-  // sepia: true,
+  sepia: true,
 })
   .then(res => res.getDataURL())
   .then(
