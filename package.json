@@ -12,12 +12,14 @@
   "scripts": {
     "build": "babel -o dist/vintage.js src/index.js",
     "examples": "browserify -e examples/example.js -t babelify -o examples/vintage.js",
-    "watch-examples": "watchify -v -e examples/example.js -t babelify -o examples/vintage.js"
+    "watch-examples": "watchify -v -e examples/example.js -t babelify -o examples/vintage.js",
+    "test": "mocha --require babel-register"
   },
   "dependencies": {
     "nullthrows": "^1.0.0"
   },
   "devDependencies": {
+    "assert": "^1.4.1",
     "babel-cli": "^6.23.0",
     "babel-plugin-syntax-flow": "^6.18.0",
     "babel-plugin-transform-flow-strip-types": "^6.22.0",
@@ -25,8 +27,11 @@
     "babel-preset-stage-0": "^6.22.0",
     "babelify": "^7.3.0",
     "browserify": "^14.1.0",
+    "expect.js": "^0.3.1",
     "flow-bin": "^0.39.0",
     "flow-typed": "^2.0.0",
+    "mocha": "^3.2.0",
+    "sinon": "^1.17.7",
     "watchify": "^3.9.0"
   }
 }
