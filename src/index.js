@@ -154,7 +154,6 @@ export default (
   partialEffect: $Shape<Effect>,
 ): Promise<TRessult> =>
   new Promise((resolve, reject) => {
-    console.time('effect');
     const effect = {
       ...defaultEffect,
       ...partialEffect,
@@ -208,7 +207,6 @@ export default (
     if (effect.vignette) {
       ctx.globalCompositeOperation = 'multiply';
       if (ctx.globalCompositeOperation !== 'multiply') {
-        console.log('globalCompositeOperation fallback');
         ctx.globalCompositeOperation = 'source-over';
       }
       ctx.fillStyle = getGradient(ctx, width, height, [
@@ -229,7 +227,6 @@ export default (
       ctx.fillRect(0, 0, width, height);
     }
 
-    console.timeEnd('effect');
     resolve({
       getDataURL(
         mimeType: string = IMAGE_TYPE,

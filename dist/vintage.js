@@ -136,7 +136,6 @@ var getLUT = function getLUT(effect) {
 
 exports.default = function (srcEl, partialEffect) {
   return new Promise(function (resolve, reject) {
-    console.time('effect');
     var effect = _extends({}, defaultEffect, partialEffect);
     var LUT = getLUT(effect);
     var canvas = getCanvas(srcEl);
@@ -193,7 +192,6 @@ exports.default = function (srcEl, partialEffect) {
     if (effect.vignette) {
       ctx.globalCompositeOperation = 'multiply';
       if (ctx.globalCompositeOperation !== 'multiply') {
-        console.log('globalCompositeOperation fallback');
         ctx.globalCompositeOperation = 'source-over';
       }
       ctx.fillStyle = getGradient(ctx, width, height, ['rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'rgba(0,0,0,' + effect.vignette + ')']);
@@ -206,7 +204,6 @@ exports.default = function (srcEl, partialEffect) {
       ctx.fillRect(0, 0, width, height);
     }
 
-    console.timeEnd('effect');
     resolve({
       getDataURL: function getDataURL() {
         var mimeType = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : IMAGE_TYPE;
