@@ -7,32 +7,22 @@ Add a retro/vintage effect to images using the HTML5 canvas element.
 // use an image as source
 const srcEl = document.querySelector('img.myImage');
 vintagejs(srcEl, { brightness: 0.2 })
-  .then(
-    result => {
-      srcEl.src = result;
-    },
-    error => {
-      console.log(`Failed: ${error}`);
-    },
-  );
+  .then(res => res.getDataURL())
+  .then(url => {
+    srcEl.src = url;
+  })
+  .catch(err => console.log(err));
 
 
 // use a canvas as source
 const srcEl = document.querySelector('canvas.myCanvas');
 const ctx = srcEl.getContext('2d');
 vintagejs(srcEl, { brightness: 0.2 })
-  .then(
-    result => {
-      const img = new Image();
-      img.src = result;
-      img.onload = () => {
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      };
-    },
-    error => {
-      console.log(`Failed: ${error}`);
-    },
-  );
+  .then(res => res.getCanvas())
+  .then(canvas => {
+    ctx.drawImage(canvas, 0, 0, srcEl.width, srcEl.height);
+  })
+  .then(err => console.log(err));
 ```
 
 ## Effect options
@@ -40,20 +30,20 @@ vintagejs(srcEl, { brightness: 0.2 })
 Update effect documentation
 
 ```javascript
-type RGBAColor = {
+type TRGBAColor = {
   r: number,
   g: number,
   b: number,
   a: number,
 };
-type Curve = {
+type TCurve = {
   r: Array<number>,
   g: Array<number>,
   b: Array<number>,
 };
-type Effect = {
-  curves: false | Curve,
-  screen: false | RGBAColor,
+type TEffect = {
+  curves: false | TCurve,
+  screen: false | TRGBAColor,
   saturation: number,
   vignette: number,
   lighten: number,
@@ -66,6 +56,7 @@ type Effect = {
 
 ## Browser support
 Check support for the canvas element: [canisue.com/canvas](http://caniuse.com/canvas)
+Higher performance of canvas blend modes are supported as well: [caniuse.com/#feat=canvas-blending](http://caniuse.com/#feat=canvas-blending)
 
 ## Open Source License
 
