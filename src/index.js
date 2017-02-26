@@ -1,42 +1,18 @@
 // @flow
 
-import nullthrows from 'nullthrows';
+import type { TEffect, TSourceElement, TResult } from './types.js';
 
-type UnaryFn<A, B> = (a: A) => B;
-export type Pixel = [number, number, number];
-export type SourceElement = HTMLImageElement | HTMLCanvasElement;
-export type RGBAColor = {
-  r: number,
-  g: number,
-  b: number,
-  a: number,
-};
+import {
+  compose,
+  createCanvasAndCtxFromImage,
+  getCanvasAndCtx,
+  getGradient,
+  getResult,
+  loadImage,
+  loadImageWithCache,
+} from './utils.js';
 
-export type Curve = {
-  r: Array<number>,
-  g: Array<number>,
-  b: Array<number>,
-};
-
-export type Effect = {
-  curves: false | Curve,
-  screen: false | RGBAColor,
-  saturation: number,
-  vignette: number,
-  lighten: number,
-  viewfinder: false | string,
-  sepia: boolean,
-  brightness: number,
-  contrast: number,
-};
-
-export type TResult = {
-  getDataURL(mimeType?: string, quality?: number): string,
-  getCanvas(): HTMLCanvasElement,
-  getImage(mimeType?: string, quality?: number): Promise<HTMLImageElement>,
-};
-
-const defaultEffect: Effect = {
+const defaultEffect: TEffect = {
   curves: false,
   screen: false,
   saturation: 1,
@@ -48,70 +24,6 @@ const defaultEffect: Effect = {
   contrast: 0,
 };
 
-const IMAGE_TYPE = 'image/jpeg';
-const IMAGE_QUALITY = 1;
-
-const createCanvasAndCtxFromImage = (
-  el: HTMLImageElement,
-  width?: number,
-  height?: number,
-): [HTMLCanvasElement, CanvasRenderingContext2D] => {
-  const canvas = document.createElement('canvas');
-  if (!width) width = el.width;
-  if (!height) height = el.height;
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = nullthrows(
-    canvas.getContext('2d'),
-    'Could not get 2d context for canvas',
-  );
-  ctx.drawImage(el, 0, 0, width, height);
-
-  return [canvas, ctx];
-};
-
-const getCanvasAndCtx = (
-  el: SourceElement,
-): [HTMLCanvasElement, CanvasRenderingContext2D] => {
-  if (el instanceof HTMLImageElement) {
-    return createCanvasAndCtxFromImage(el);
-  }
-  if (el instanceof HTMLCanvasElement) {
-    return [
-      el,
-      nullthrows(el.getContext('2d'), 'Could not get 2d context for canvas'),
-    ];
-  }
-  throw new Error(
-    `Unsupported source element. Expected HTMLCanvasElement or HTMLImageElement, got ${typeof el}.`,
-  );
-};
-
-const getGradient = (
-  ctx: CanvasRenderingContext2D,
-  width: number,
-  height: number,
-  colorSteps: Array<string>,
-): CanvasGradient => {
-  const gradient = ctx.createRadialGradient(
-    width / 2,
-    height / 2,
-    0,
-    width / 2,
-    height / 2,
-    Math.sqrt(Math.pow(width / 2, 2) + Math.pow(height / 2, 2)),
-  );
-  colorSteps.forEach((color, idx, steps) => {
-    gradient.addColorStop(idx / (steps.length - 1), color);
-  });
-  return gradient;
-};
-const compose = <T1, T2, R>(
-  f: UnaryFn<T2, R>,
-  g: UnaryFn<T1, T2>,
-): UnaryFn<T1, R> =>
-  x => f(g(x));
-
 const idFn = (c: number): number => c;
 const curvesFn = (curves: Array<number>) => (c: number): number => curves[c];
 const contrastFn = (f: number) =>
@@ -122,7 +34,7 @@ const screenFn = (sa: number) =>
   (sc: number) =>
     (c: number): number => 255 - (255 - c) * (255 - sc * sa) / 255;
 
-const getLUT = (effect: Effect): Array<Array<number>> => {
+const getLUT = (effect: TEffect): Array<Array<number>> => {
   const { curves, contrast, brightness, screen, saturation } = effect;
   let rMod = idFn;
   let gMod = idFn;
@@ -159,48 +71,10 @@ const getLUT = (effect: Effect): Array<Array<number>> => {
   return [id_arr.map(rMod), id_arr.map(gMod), id_arr.map(bMod)];
 };
 
-const loadImage = (src: string): Promise<Image> => new Promise((
-  resolve,
-  reject,
-) => {
-  const img = new Image();
-  img.onload = () => resolve(img);
-  img.onerror = err => reject(err);
-  img.src = src;
-});
-
-const loadImageWithCache = (() => {
-  const cache = {};
-  return (src: string) => cache[src]
-    ? Promise.resolve(cache[src])
-    : loadImage(src).then(img => {
-        cache[src] = img;
-        return img;
-      });
-})();
-
-const getResult = (canvas: HTMLCanvasElement): TResult => ({
-  getDataURL(
-    mimeType: string = IMAGE_TYPE,
-    quality: number = IMAGE_QUALITY,
-  ): string {
-    return canvas.toDataURL(mimeType, quality);
-  },
-  getCanvas(): HTMLCanvasElement {
-    return canvas;
-  },
-  getImage(
-    mimeType: string = IMAGE_TYPE,
-    quality: number = IMAGE_QUALITY,
-  ): Promise<HTMLImageElement> {
-    return loadImage(canvas.toDataURL(mimeType, quality));
-  },
-});
-
 // ApplyEffect :: SourceElement -> $Shape<Effect> -> Promise<string>
 export default (
-  srcEl: SourceElement,
-  partialEffect: $Shape<Effect>,
+  srcEl: TSourceElement,
+  partialEffect: $Shape<TEffect>,
 ): Promise<TResult> =>
   new Promise((resolve, reject) => {
     const effect = {

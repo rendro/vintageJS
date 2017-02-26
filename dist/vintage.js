@@ -4,15 +4,11 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-var _nullthrows = require('nullthrows');
-
-var _nullthrows2 = _interopRequireDefault(_nullthrows);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _utils = require('./utils.js');
 
 var defaultEffect = {
   curves: false,
@@ -20,46 +16,10 @@ var defaultEffect = {
   saturation: 1,
   vignette: 0,
   lighten: 0,
-  viewFinder: false,
+  viewfinder: false,
   sepia: false,
   brightness: 0,
   contrast: 0
-};
-
-var IMAGE_TYPE = 'image/jpeg';
-var IMAGE_QUALITY = 1;
-
-var createCanvasFromImage = function createCanvasFromImage(el) {
-  var canvas = document.createElement('canvas');
-  canvas.width = el.width;
-  canvas.height = el.height;
-  var ctx = (0, _nullthrows2.default)(canvas.getContext('2d'), 'Could not get 2d context for canvas');
-  ctx.drawImage(el, 0, 0, el.width, el.height);
-
-  return canvas;
-};
-
-var getCanvas = function getCanvas(el) {
-  if (el instanceof HTMLImageElement) {
-    return createCanvasFromImage(el);
-  }
-  if (el instanceof HTMLCanvasElement) {
-    return el;
-  }
-  throw new Error('Unsupported source element. Expected HTMLCanvasElement or HTMLImageElement, got ' + (typeof el === 'undefined' ? 'undefined' : _typeof(el)) + '.');
-};
-
-var getGradient = function getGradient(ctx, width, height, colorSteps) {
-  var gradient = ctx.createRadialGradient(width / 2, height / 2, 0, width / 2, height / 2, Math.sqrt(Math.pow(width / 2, 2) + Math.pow(height / 2, 2)));
-  colorSteps.forEach(function (color, idx, steps) {
-    gradient.addColorStop(idx / (steps.length - 1), color);
-  });
-  return gradient;
-};
-var compose = function compose(f, g) {
-  return function (x) {
-    return f(g(x));
-  };
 };
 
 var idFn = function idFn(c) {
@@ -100,30 +60,30 @@ var getLUT = function getLUT(effect) {
   var bMod = idFn;
 
   if (curves) {
-    rMod = compose(curvesFn(curves.r), rMod);
-    gMod = compose(curvesFn(curves.g), gMod);
-    bMod = compose(curvesFn(curves.b), bMod);
+    rMod = (0, _utils.compose)(curvesFn(curves.r), rMod);
+    gMod = (0, _utils.compose)(curvesFn(curves.g), gMod);
+    bMod = (0, _utils.compose)(curvesFn(curves.b), bMod);
   }
 
   if (contrast) {
     var f = contrastFn(contrast);
-    rMod = compose(f, rMod);
-    gMod = compose(f, gMod);
-    bMod = compose(f, bMod);
+    rMod = (0, _utils.compose)(f, rMod);
+    gMod = (0, _utils.compose)(f, gMod);
+    bMod = (0, _utils.compose)(f, bMod);
   }
 
   if (brightness) {
     var _f = brightnessFn(brightness);
-    rMod = compose(_f, rMod);
-    gMod = compose(_f, gMod);
-    bMod = compose(_f, bMod);
+    rMod = (0, _utils.compose)(_f, rMod);
+    gMod = (0, _utils.compose)(_f, gMod);
+    bMod = (0, _utils.compose)(_f, bMod);
   }
 
   if (screen) {
     var _f2 = screenFn(screen.a);
-    rMod = compose(_f2(screen.r), rMod);
-    gMod = compose(_f2(screen.g), gMod);
-    bMod = compose(_f2(screen.b), bMod);
+    rMod = (0, _utils.compose)(_f2(screen.r), rMod);
+    gMod = (0, _utils.compose)(_f2(screen.g), gMod);
+    bMod = (0, _utils.compose)(_f2(screen.b), bMod);
   }
 
   var id_arr = new Array(256).fill(1).map(function (_, idx) {
@@ -138,16 +98,22 @@ exports.default = function (srcEl, partialEffect) {
   return new Promise(function (resolve, reject) {
     var effect = _extends({}, defaultEffect, partialEffect);
     var LUT = getLUT(effect);
-    var canvas = getCanvas(srcEl);
+
+    var _getCanvasAndCtx = (0, _utils.getCanvasAndCtx)(srcEl),
+        _getCanvasAndCtx2 = _slicedToArray(_getCanvasAndCtx, 2),
+        canvas = _getCanvasAndCtx2[0],
+        ctx = _getCanvasAndCtx2[1];
+
     var width = canvas.width,
         height = canvas.height;
 
-    var ctx = (0, _nullthrows2.default)(canvas.getContext('2d'), 'Could not get 2d context for canvas');
-
+    ctx.globalCompositeOperation = 'multiply';
+    var supportsBlendModes = ctx.globalCompositeOperation === 'multiply';
     var data = ctx.getImageData(0, 0, width, height);
     var id = data.data.slice(0);
     var sepia = effect.sepia,
-        saturation = effect.saturation;
+        saturation = effect.saturation,
+        viewfinder = effect.viewfinder;
 
 
     var r = void 0,
@@ -190,45 +156,41 @@ exports.default = function (srcEl, partialEffect) {
     ctx.putImageData(data, 0, 0);
 
     if (effect.vignette) {
-      ctx.globalCompositeOperation = 'multiply';
-      if (ctx.globalCompositeOperation !== 'multiply') {
-        ctx.globalCompositeOperation = 'source-over';
-      }
-      ctx.fillStyle = getGradient(ctx, width, height, ['rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'rgba(0,0,0,' + effect.vignette + ')']);
+      ctx.globalCompositeOperation = supportsBlendModes ? 'multiply' : 'source-over';
+      ctx.fillStyle = (0, _utils.getGradient)(ctx, width, height, ['rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'rgba(0,0,0,' + effect.vignette + ')']);
       ctx.fillRect(0, 0, width, height);
     }
 
     if (effect.lighten) {
-      ctx.globalCompositeOperation = 'lighter';
-      ctx.fillStyle = getGradient(ctx, width, height, ['rgba(255,255,255,' + effect.lighten + ')', 'rgba(255,255,255,0)', 'rgba(0,0,0,0)']);
+      ctx.globalCompositeOperation = supportsBlendModes ? 'screen' : 'lighter';
+      ctx.fillStyle = (0, _utils.getGradient)(ctx, width, height, ['rgba(255,255,255,' + effect.lighten + ')', 'rgba(255,255,255,0)', 'rgba(0,0,0,0)']);
       ctx.fillRect(0, 0, width, height);
     }
 
-    resolve({
-      getDataURL: function getDataURL() {
-        var mimeType = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : IMAGE_TYPE;
-        var quality = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : IMAGE_QUALITY;
+    if (!viewfinder) {
+      resolve((0, _utils.getResult)(canvas));
+    } else {
+      return (0, _utils.loadImageWithCache)(viewfinder).then(function (img) {
+        if (supportsBlendModes) {
+          ctx.globalCompositeOperation = 'multiply';
+          ctx.drawImage(img, 0, 0, width, height);
+        } else {
+          var _createCanvasAndCtxFr = (0, _utils.createCanvasAndCtxFromImage)(img, width, height),
+              _createCanvasAndCtxFr2 = _slicedToArray(_createCanvasAndCtxFr, 2),
+              _ = _createCanvasAndCtxFr2[0],
+              vfCtx = _createCanvasAndCtxFr2[1];
 
-        return canvas.toDataURL(mimeType, quality);
-      },
-      getCanvas: function getCanvas() {
-        return canvas;
-      },
-      getImage: function getImage() {
-        var mimeType = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : IMAGE_TYPE;
-        var quality = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : IMAGE_QUALITY;
+          var _vfCtx$getImageData = vfCtx.getImageData(0, 0, width, height),
+              vfData = _vfCtx$getImageData.data;
 
-        return new Promise(function (res, rej) {
-          var img = new Image();
-          img.onload = function () {
-            return res(img);
-          };
-          img.onerror = function (err) {
-            return rej(err);
-          };
-          img.src = canvas.toDataURL(mimeType, quality);
-        });
-      }
-    });
+          var imageData = ctx.getImageData(0, 0, width, height);
+          imageData.data.set(imageData.data.map(function (v, i) {
+            return v * vfData[i] / 255;
+          }));
+          ctx.putImageData(imageData, 0, 0);
+        }
+        resolve((0, _utils.getResult)(canvas));
+      });
+    }
   });
 };
