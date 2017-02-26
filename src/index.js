@@ -150,28 +150,32 @@ export default (
     const id = data.data.slice(0);
     const { sepia, saturation } = effect;
 
-    let r, g, b;
+    let r, g, b, ri, gi, bi;
     for (let i = id.length / 4; i >= 0; --i) {
-      r = i << 2;
-      g = r + 1;
-      b = r + 2;
+      ri = i << 2;
+      gi = ri + 1;
+      bi = ri + 2;
 
-      id[r] = LUT[0][id[r]];
-      id[g] = LUT[1][id[g]];
-      id[b] = LUT[2][id[b]];
+      r = LUT[0][id[ri]];
+      g = LUT[1][id[gi]];
+      b = LUT[2][id[bi]];
 
       if (sepia) {
-        id[r] = id[r] * 0.393 + id[g] * 0.769 + id[b] * 0.189;
-        id[g] = id[r] * 0.349 + id[g] * 0.686 + id[b] * 0.168;
-        id[b] = id[r] * 0.272 + id[g] * 0.534 + id[b] * 0.131;
+        r = r * 0.393 + g * 0.769 + b * 0.189;
+        g = r * 0.349 + g * 0.686 + b * 0.168;
+        b = r * 0.272 + g * 0.534 + b * 0.131;
       }
 
       if (saturation < 1) {
-        const average = (id[r] + id[g] + id[b]) / 3;
-        id[r] += (average - id[r]) * (1 - saturation);
-        id[g] += (average - id[g]) * (1 - saturation);
-        id[b] += (average - id[b]) * (1 - saturation);
+        const avg = (r + g + b) / 3;
+        r += (avg - r) * (1 - saturation);
+        g += (avg - g) * (1 - saturation);
+        b += (avg - b) * (1 - saturation);
       }
+
+      id[ri] = r;
+      id[gi] = g;
+      id[bi] = b;
     }
 
     data.data.set(id);
