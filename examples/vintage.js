@@ -124,10 +124,13 @@ var getCanvas = function getCanvas(el) {
   throw new Error('Unsupported source element. Expected HTMLCanvasElement or HTMLImageElement, got ' + (typeof el === 'undefined' ? 'undefined' : _typeof(el)) + '.');
 };
 
-// cool when used as contrast
-// const contrastFn = _ =>
-//   c => 259 * (c + 255) / (255 * (259 - c)) * (c - 128) + 128;
-
+var getGradient = function getGradient(ctx, width, height, colorSteps) {
+  var gradient = ctx.createRadialGradient(width / 2, height / 2, 0, width / 2, height / 2, Math.sqrt(Math.pow(width / 2, 2) + Math.pow(height / 2, 2)));
+  colorSteps.forEach(function (color, idx, steps) {
+    gradient.addColorStop(idx / (steps.length - 1), color);
+  });
+  return gradient;
+};
 var compose = function compose(f, g) {
   return function (x) {
     return f(g(x));
@@ -265,21 +268,13 @@ exports.default = function (srcEl, partialEffect) {
         console.log('globalCompositeOperation fallback');
         ctx.globalCompositeOperation = 'source-over';
       }
-      var gradient = ctx.createRadialGradient(width / 2, height / 2, 0, width / 2, height / 2, Math.sqrt(Math.pow(width / 2, 2) + Math.pow(height / 2, 2)));
-      gradient.addColorStop(0, 'rgba(0,0,0,0)');
-      gradient.addColorStop(0.5, 'rgba(0,0,0,0)');
-      gradient.addColorStop(1, 'rgba(0,0,0,' + effect.vignette + ')');
-      ctx.fillStyle = gradient;
+      ctx.fillStyle = getGradient(ctx, width, height, ['rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'rgba(0,0,0,' + effect.vignette + ')']);
       ctx.fillRect(0, 0, width, height);
     }
 
     if (effect.lighten) {
       ctx.globalCompositeOperation = 'lighter';
-      var _gradient = ctx.createRadialGradient(width / 2, height / 2, 0, width / 2, height / 2, Math.sqrt(Math.pow(width / 2, 2) + Math.pow(height / 2, 2)));
-      _gradient.addColorStop(0, 'rgba(255,255,255,' + effect.lighten + ')');
-      _gradient.addColorStop(0.5, 'rgba(255,255,255,0)');
-      _gradient.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = _gradient;
+      ctx.fillStyle = getGradient(ctx, width, height, ['rgba(255,255,255,' + effect.lighten + ')', 'rgba(255,255,255,0)', 'rgba(0,0,0,0)']);
       ctx.fillRect(0, 0, width, height);
     }
     var res = canvas.toDataURL(IMAGE_TYPE, IMAGE_QUALITY);
