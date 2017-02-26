@@ -53,12 +53,7 @@ var curves2 = {
   brightness: -0.1,
   contrast: 0.15,
   curves: curves1,
-  screen: {
-    r: 227,
-    g: 12,
-    b: 169,
-    a: 0.15
-  }
+  saturation: 0.5
 }).then(function (dataUri) {
   resultImg.src = dataUri;
 }, function (err) {
@@ -109,26 +104,22 @@ var defaultEffect = {
 var IMAGE_TYPE = 'image/jpeg';
 var IMAGE_QUALITY = 1;
 
-var readSourceFromCanvas = function readSourceFromCanvas(el) {
-  return el.toDataURL(IMAGE_TYPE, IMAGE_QUALITY);
-};
-
-var readSourceFromImage = function readSourceFromImage(el) {
+var createCanvasFromImage = function createCanvasFromImage(el) {
   var canvas = document.createElement('canvas');
   canvas.width = el.width;
   canvas.height = el.height;
   var ctx = (0, _nullthrows2.default)(canvas.getContext('2d'), 'Could not get 2d context for canvas');
   ctx.drawImage(el, 0, 0, el.width, el.height);
 
-  return readSourceFromCanvas(canvas);
+  return canvas;
 };
 
-var readSource = function readSource(el) {
+var getCanvas = function getCanvas(el) {
   if (el instanceof HTMLImageElement) {
-    return readSourceFromImage(el);
+    return createCanvasFromImage(el);
   }
   if (el instanceof HTMLCanvasElement) {
-    return readSourceFromCanvas(el);
+    return el;
   }
   throw new Error('Unsupported source element. Expected HTMLCanvasElement or HTMLImageElement, got ' + (typeof el === 'undefined' ? 'undefined' : _typeof(el)) + '.');
 };
@@ -169,13 +160,11 @@ var screenFn = function screenFn(sa) {
   };
 };
 
-// _imageData[idx  ] += ((average - _imageData[idx  ]) * _effect.desaturate);
 var getLUT = function getLUT(effect) {
   var curves = effect.curves,
       contrast = effect.contrast,
       brightness = effect.brightness,
       screen = effect.screen,
-      sepia = effect.sepia,
       saturation = effect.saturation;
 
   var rMod = idFn;
@@ -212,14 +201,8 @@ var getLUT = function getLUT(effect) {
   var id_arr = new Array(256).fill(1).map(function (_, idx) {
     return idx;
   });
-  return [id_arr.map(rMod), id_arr.map(gMod), id_arr.map(bMod), id_arr.slice(0)];
+  return [id_arr.map(rMod), id_arr.map(gMod), id_arr.map(bMod)];
 };
-
-// const getVignette = (): string => {
-//   const { width, height } = canvas;
-//   ctx.clearRect(0, 0, width, height);
-//   // ctx.globalCompositeOperation = 'multiply';
-// };
 
 // ApplyEffect :: SourceElement -> $Shape<Effect> -> Promise<string>
 
@@ -228,19 +211,45 @@ exports.default = function (srcEl, partialEffect) {
     console.time('effect');
     var effect = _extends({}, defaultEffect, partialEffect);
     var LUT = getLUT(effect);
-    var imageData = readSource(srcEl);
-    var canvas = document.createElement('canvas');
-    var width = srcEl.width,
-        height = srcEl.height;
+    var canvas = getCanvas(srcEl);
+    var width = canvas.width,
+        height = canvas.height;
 
-    canvas.width = width;
-    canvas.height = height;
     var ctx = (0, _nullthrows2.default)(canvas.getContext('2d'), 'Could not get 2d context for canvas');
-    ctx.drawImage(srcEl, 0, 0, canvas.width, canvas.height);
-    var data = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    data.data.set(data.data.map(function (v, i) {
-      return LUT[i % 4][v];
-    }));
+
+    var data = ctx.getImageData(0, 0, width, height);
+    var id = data.data.slice(0);
+    var sepia = effect.sepia,
+        saturation = effect.saturation;
+
+
+    var r = void 0,
+        g = void 0,
+        b = void 0;
+    for (var i = id.length / 4; i >= 0; --i) {
+      r = i << 2;
+      g = r + 1;
+      b = r + 2;
+
+      id[r] = LUT[0][id[r]];
+      id[g] = LUT[1][id[g]];
+      id[b] = LUT[2][id[b]];
+
+      if (sepia) {
+        id[r] = id[r] * 0.393 + id[g] * 0.769 + id[b] * 0.189;
+        id[g] = id[r] * 0.349 + id[g] * 0.686 + id[b] * 0.168;
+        id[b] = id[r] * 0.272 + id[g] * 0.534 + id[b] * 0.131;
+      }
+
+      if (saturation < 1) {
+        var average = (id[r] + id[g] + id[b]) / 3;
+        id[r] += (average - id[r]) * (1 - saturation);
+        id[g] += (average - id[g]) * (1 - saturation);
+        id[b] += (average - id[b]) * (1 - saturation);
+      }
+    }
+
+    data.data.set(id);
     ctx.putImageData(data, 0, 0);
 
     if (effect.vignette) {

@@ -2,8 +2,9 @@
 
 import nullthrows from 'nullthrows';
 
+type UnaryFn<A, B> = (a: A) => B;
+export type Pixel = [number, number, number];
 export type SourceElement = HTMLImageElement | HTMLCanvasElement;
-
 export type RGBAColor = {
   r: number,
   g: number,
@@ -44,10 +45,7 @@ const defaultEffect: Effect = {
 const IMAGE_TYPE = 'image/jpeg';
 const IMAGE_QUALITY = 1;
 
-const readSourceFromCanvas = (el: HTMLCanvasElement): string =>
-  el.toDataURL(IMAGE_TYPE, IMAGE_QUALITY);
-
-const readSourceFromImage = (el: HTMLImageElement): string => {
+const createCanvasFromImage = (el: HTMLImageElement): HTMLCanvasElement => {
   const canvas = document.createElement('canvas');
   canvas.width = el.width;
   canvas.height = el.height;
@@ -57,15 +55,15 @@ const readSourceFromImage = (el: HTMLImageElement): string => {
   );
   ctx.drawImage(el, 0, 0, el.width, el.height);
 
-  return readSourceFromCanvas(canvas);
+  return canvas;
 };
 
-const readSource = (el: SourceElement): string => {
+const getCanvas = (el: SourceElement): createCanvasFromImage => {
   if (el instanceof HTMLImageElement) {
-    return readSourceFromImage(el);
+    return createCanvasFromImage(el);
   }
   if (el instanceof HTMLCanvasElement) {
-    return readSourceFromCanvas(el);
+    return el;
   }
   throw new Error(
     `Unsupported source element. Expected HTMLCanvasElement or HTMLImageElement, got ${typeof el}.`,
@@ -76,7 +74,6 @@ const readSource = (el: SourceElement): string => {
 // const contrastFn = _ =>
 //   c => 259 * (c + 255) / (255 * (259 - c)) * (c - 128) + 128;
 
-type UnaryFn<A, B> = (a: A) => B;
 const compose = <T1, T2, R>(
   f: UnaryFn<T2, R>,
   g: UnaryFn<T1, T2>,
@@ -93,9 +90,8 @@ const screenFn = (sa: number) =>
   (sc: number) =>
     (c: number): number => 255 - (255 - c) * (255 - sc * sa) / 255;
 
-// _imageData[idx  ] += ((average - _imageData[idx  ]) * _effect.desaturate);
 const getLUT = (effect: Effect): Array<Array<number>> => {
-  const { curves, contrast, brightness, screen } = effect;
+  const { curves, contrast, brightness, screen, saturation } = effect;
   let rMod = idFn;
   let gMod = idFn;
   let bMod = idFn;
@@ -128,12 +124,7 @@ const getLUT = (effect: Effect): Array<Array<number>> => {
   }
 
   const id_arr = new Array(256).fill(1).map((_, idx) => idx);
-  return [
-    id_arr.map(rMod),
-    id_arr.map(gMod),
-    id_arr.map(bMod),
-    id_arr.slice(0),
-  ];
+  return [id_arr.map(rMod), id_arr.map(gMod), id_arr.map(bMod)];
 };
 
 // ApplyEffect :: SourceElement -> $Shape<Effect> -> Promise<string>
@@ -148,18 +139,42 @@ export default (
       ...partialEffect,
     };
     const LUT = getLUT(effect);
-    const imageData = readSource(srcEl);
-    const canvas = document.createElement('canvas');
-    const { width, height } = srcEl;
-    canvas.width = width;
-    canvas.height = height;
+    const canvas = getCanvas(srcEl);
+    const { width, height } = canvas;
     const ctx = nullthrows(
       canvas.getContext('2d'),
       'Could not get 2d context for canvas',
     );
-    ctx.drawImage(srcEl, 0, 0, canvas.width, canvas.height);
-    const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    data.data.set(data.data.map((v, i) => LUT[i % 4][v]));
+
+    const data = ctx.getImageData(0, 0, width, height);
+    const id = data.data.slice(0);
+    const { sepia, saturation } = effect;
+
+    let r, g, b;
+    for (let i = id.length / 4; i >= 0; --i) {
+      r = i << 2;
+      g = r + 1;
+      b = r + 2;
+
+      id[r] = LUT[0][id[r]];
+      id[g] = LUT[1][id[g]];
+      id[b] = LUT[2][id[b]];
+
+      if (sepia) {
+        id[r] = id[r] * 0.393 + id[g] * 0.769 + id[b] * 0.189;
+        id[g] = id[r] * 0.349 + id[g] * 0.686 + id[b] * 0.168;
+        id[b] = id[r] * 0.272 + id[g] * 0.534 + id[b] * 0.131;
+      }
+
+      if (saturation < 1) {
+        const average = (id[r] + id[g] + id[b]) / 3;
+        id[r] += (average - id[r]) * (1 - saturation);
+        id[g] += (average - id[g]) * (1 - saturation);
+        id[b] += (average - id[b]) * (1 - saturation);
+      }
+    }
+
+    data.data.set(id);
     ctx.putImageData(data, 0, 0);
 
     if (effect.vignette) {

@@ -11,7 +11,7 @@ const r = c =>
   (-0.2) *
     Math.sqrt(255 * c) *
     Math.sin(Math.PI * ((-0.0000195) * c * c + 0.0125 * c)) +
-    c;
+  c;
 const g = c => (-0.001045244139166791) * c * c + 1.2665372554875318 * c;
 const b = c => 0.57254902 * c + 53;
 
@@ -34,12 +34,13 @@ vintagejs(img, {
   brightness: -0.1,
   contrast: 0.15,
   curves: curves1,
-  screen: {
-    r: 227,
-    g: 12,
-    b: 169,
-    a: 0.15,
-  },
+  saturation: 0.5,
+  // screen: {
+  //   r: 227,
+  //   g: 12,
+  //   b: 169,
+  //   a: 0.15,
+  // },
   // sepia: true,
 }).then(
   function(dataUri) {
