@@ -30,6 +30,12 @@ export type Effect = {
   contrast: number,
 };
 
+export type TRessult = {
+  getDataURL(mimeType?: string, quality?: number): string,
+  getCanvas(): HTMLCanvasElement,
+  getImage(mimeType?: string, quality?: number): Promise<HTMLImageElement>,
+};
+
 const defaultEffect: Effect = {
   curves: false,
   screen: false,
@@ -58,7 +64,7 @@ const createCanvasFromImage = (el: HTMLImageElement): HTMLCanvasElement => {
   return canvas;
 };
 
-const getCanvas = (el: SourceElement): createCanvasFromImage => {
+const getCanvas = (el: SourceElement): HTMLCanvasElement => {
   if (el instanceof HTMLImageElement) {
     return createCanvasFromImage(el);
   }
@@ -146,7 +152,7 @@ const getLUT = (effect: Effect): Array<Array<number>> => {
 export default (
   srcEl: SourceElement,
   partialEffect: $Shape<Effect>,
-): Promise<string> =>
+): Promise<TRessult> =>
   new Promise((resolve, reject) => {
     console.time('effect');
     const effect = {
@@ -176,9 +182,12 @@ export default (
       b = LUT[2][id[bi]];
 
       if (sepia) {
-        r = r * 0.393 + g * 0.769 + b * 0.189;
-        g = r * 0.349 + g * 0.686 + b * 0.168;
-        b = r * 0.272 + g * 0.534 + b * 0.131;
+        let _r = r * 0.393 + g * 0.769 + b * 0.189;
+        let _g = r * 0.349 + g * 0.686 + b * 0.168;
+        let _b = r * 0.272 + g * 0.534 + b * 0.131;
+        r = _r;
+        g = _g;
+        b = _b;
       }
 
       if (saturation < 1) {
@@ -219,7 +228,28 @@ export default (
       ]);
       ctx.fillRect(0, 0, width, height);
     }
-    const res = canvas.toDataURL(IMAGE_TYPE, IMAGE_QUALITY);
+
     console.timeEnd('effect');
-    resolve(res);
+    resolve({
+      getDataURL(
+        mimeType: string = IMAGE_TYPE,
+        quality: number = IMAGE_QUALITY,
+      ): string {
+        return canvas.toDataURL(mimeType, quality);
+      },
+      getCanvas(): HTMLCanvasElement {
+        return canvas;
+      },
+      getImage(
+        mimeType: string = IMAGE_TYPE,
+        quality: number = IMAGE_QUALITY,
+      ): Promise<HTMLImageElement> {
+        return new Promise((res, rej) => {
+          const img = new Image();
+          img.onload = () => res(img);
+          img.onerror = err => rej(err);
+          img.src = canvas.toDataURL(mimeType, quality);
+        });
+      },
+    });
   });

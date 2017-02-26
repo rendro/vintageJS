@@ -34,19 +34,21 @@ vintagejs(img, {
   brightness: -0.1,
   contrast: 0.15,
   curves: curves1,
-  saturation: 0.5,
-  // screen: {
-  //   r: 227,
-  //   g: 12,
-  //   b: 169,
-  //   a: 0.15,
-  // },
+  saturation: 0.7,
+  screen: {
+    r: 227,
+    g: 12,
+    b: 169,
+    a: 0.15,
+  },
   // sepia: true,
-}).then(
-  function(dataUri) {
-    resultImg.src = dataUri;
-  },
-  function(err) {
-    console.error(err);
-  },
-);
+})
+  .then(res => res.getDataURL())
+  .then(
+    function(dataUri) {
+      resultImg.src = dataUri;
+    },
+    function(err) {
+      console.error(err);
+    },
+  );

@@ -53,7 +53,15 @@ var curves2 = {
   brightness: -0.1,
   contrast: 0.15,
   curves: curves1,
-  saturation: 0.5
+  saturation: 0.7,
+  screen: {
+    r: 227,
+    g: 12,
+    b: 169,
+    a: 0.15
+  }
+}).then(function (res) {
+  return res.getDataURL();
 }).then(function (dataUri) {
   resultImg.src = dataUri;
 }, function (err) {
@@ -242,9 +250,12 @@ exports.default = function (srcEl, partialEffect) {
       b = LUT[2][id[bi]];
 
       if (sepia) {
-        r = r * 0.393 + g * 0.769 + b * 0.189;
-        g = r * 0.349 + g * 0.686 + b * 0.168;
-        b = r * 0.272 + g * 0.534 + b * 0.131;
+        var _r = r * 0.393 + g * 0.769 + b * 0.189;
+        var _g = r * 0.349 + g * 0.686 + b * 0.168;
+        var _b = r * 0.272 + g * 0.534 + b * 0.131;
+        r = _r;
+        g = _g;
+        b = _b;
       }
 
       if (saturation < 1) {
@@ -277,9 +288,34 @@ exports.default = function (srcEl, partialEffect) {
       ctx.fillStyle = getGradient(ctx, width, height, ['rgba(255,255,255,' + effect.lighten + ')', 'rgba(255,255,255,0)', 'rgba(0,0,0,0)']);
       ctx.fillRect(0, 0, width, height);
     }
-    var res = canvas.toDataURL(IMAGE_TYPE, IMAGE_QUALITY);
+
     console.timeEnd('effect');
-    resolve(res);
+    resolve({
+      getDataURL: function getDataURL() {
+        var mimeType = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : IMAGE_TYPE;
+        var quality = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : IMAGE_QUALITY;
+
+        return canvas.toDataURL(mimeType, quality);
+      },
+      getCanvas: function getCanvas() {
+        return canvas;
+      },
+      getImage: function getImage() {
+        var mimeType = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : IMAGE_TYPE;
+        var quality = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : IMAGE_QUALITY;
+
+        return new Promise(function (res, rej) {
+          var img = new Image();
+          img.onload = function () {
+            return res(img);
+          };
+          img.onerror = function (err) {
+            return rej(err);
+          };
+          img.src = canvas.toDataURL(mimeType, quality);
+        });
+      }
+    });
   });
 };
 
