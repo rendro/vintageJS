@@ -41,32 +41,60 @@ vintagejs(srcEl, { brightness: 0.2 })
 
 ## Effect options
 
+All properties on the effect object are optional. If you provide them however, you must follow these types:
+
 ```javascript
 type TEffect = {
-  curves: false | TCurve,
-  screen: false | TRGBAColor,
-  saturation: number,
-  vignette: number,
-  lighten: number,
-  viewFinder: false | string,
-  sepia: boolean,
-  brightness: number,
-  contrast: number,
+  curves: false | TCurve, // default: false
+  screen: false | TRGBAColor, // default: false
+  saturation: number, // float between 0 and 1, default: 1
+  vignette: number, // float between 0 and 1, default: 0
+  lighten: number, // float between 0 and 1, default: 0
+  viewfinder: false | string, // string must be URL, default: false
+  sepia: boolean, // default: false
+  brightness: number, // float between -1 and 1, default: 0
+  contrast: number, // float between -1 and 1, default: 0
 };
 
+// every channel, r=red, g=green, b=blue serves as a look up table for color mappings
 type TCurve = {
-  r: Array<Uint8> | Uint8ClampedArray,
-  g: Array<Uint8> | Uint8ClampedArray,
-  b: Array<Uint8> | Uint8ClampedArray,
+  r: Array<Uint8> | Uint8ClampedArray, // array of int between 0 and 255, length of array === 256
+  g: Array<Uint8> | Uint8ClampedArray, // array of int between 0 and 255, length of array === 256
+  b: Array<Uint8> | Uint8ClampedArray, // array of int between 0 and 255, length of array === 256
 };
 
 type TRGBAColor = {
-  r: number, // Uint8
-  g: number, // Uint8
-  b: number, // Uint8
+  r: Uint8, // int between 0 and 255
+  g: Uint8, // int between 0 and 255
+  b: Uint8, // int between 0 and 255
   a: number, // float between 0 and 1
 };
 ```
+
+### Examples
+
+```javascript
+const noEffect = {};
+
+const effect_1 = {
+  brightness: -0.2,
+  contrast: 0.15,
+};
+
+const effect_2 = {
+  brightness: 0.1,
+  vignette: 0.3,
+  viewfinder: './film-1.jpg',
+  screen: {
+    r: 227,
+    g: 12,
+    b: 169,
+    a: 0.15,
+  },
+};
+```
+
+See examples folder for more examples.
 
 ## Browser support
 Check support for the canvas element [canisue.com/canvas](http://caniuse.com/canvas).
