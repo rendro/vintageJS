@@ -45,15 +45,15 @@ All properties on the effect object are optional. If you provide them however, y
 
 ```javascript
 type TEffect = {
-  curves: false | TCurve, // default: false
+  curves: false | TCurve,     // default: false
   screen: false | TRGBAColor, // default: false
-  saturation: number, // float between 0 and 1, default: 1
-  vignette: number, // float between 0 and 1, default: 0
-  lighten: number, // float between 0 and 1, default: 0
+  saturation: number,         // float between 0 and 1, default: 1
+  vignette: number,           // float between 0 and 1, default: 0
+  lighten: number,            // float between 0 and 1, default: 0
   viewfinder: false | string, // string must be URL, default: false
-  sepia: boolean, // default: false
-  brightness: number, // float between -1 and 1, default: 0
-  contrast: number, // float between -1 and 1, default: 0
+  sepia: boolean,             // default: false
+  brightness: number,         // float between -1 and 1, default: 0
+  contrast: number,           // float between -1 and 1, default: 0
 };
 
 // every channel, r=red, g=green, b=blue serves as a look up table for color mappings
@@ -64,9 +64,9 @@ type TCurve = {
 };
 
 type TRGBAColor = {
-  r: Uint8, // int between 0 and 255
-  g: Uint8, // int between 0 and 255
-  b: Uint8, // int between 0 and 255
+  r: Uint8,  // int between 0 and 255
+  g: Uint8,  // int between 0 and 255
+  b: Uint8,  // int between 0 and 255
   a: number, // float between 0 and 1
 };
 ```
