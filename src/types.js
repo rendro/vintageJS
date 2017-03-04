@@ -1,5 +1,7 @@
 // @flow
 
+export type TUint8Array = Uint8ClampedArray | Array<number>;
+
 export type TUnaryFn<A, B> = (a: A) => B;
 
 export type TPixel = [number, number, number];

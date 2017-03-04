@@ -1,6 +1,12 @@
 // @flow
 
-import type { TEffect, TSourceElement, TResult } from './types.js';
+import type {
+  TEffect,
+  TSourceElement,
+  TResult,
+  TUnaryFn,
+  TUint8Array,
+} from './types.js';
 
 import {
   compose,
@@ -24,18 +30,17 @@ const defaultEffect: TEffect = {
   contrast: 0,
 };
 
-const idFn = (c: number): number => c;
-const curvesFn = (curves: Uint8ClampedArray | Array<number>) =>
-  (c: number): number => curves[c];
-const contrastFn = (f: number) =>
-  (c: number): number =>
-    259 * (f * 256 + 255) / (255 * (259 - f * 256)) * (c - 128) + 128;
-const brightnessFn = (f: number) => (c: number): number => c + f * 256;
-const screenFn = (sa: number) =>
-  (sc: number) =>
-    (c: number): number => 255 - (255 - c) * (255 - sc * sa) / 255;
+const idFn: TUnaryFn<number, number> = c => c;
+const curvesFn: TUnaryFn<TUint8Array, TUnaryFn<number, number>> = curves =>
+  c => curves[c];
+const contrastFn: TUnaryFn<number, TUnaryFn<number, number>> = f =>
+  c => 259 * (f * 256 + 255) / (255 * (259 - f * 256)) * (c - 128) + 128;
+const brightnessFn: TUnaryFn<number, TUnaryFn<number, number>> = f =>
+  c => c + f * 256;
+const screenFn: TUnaryFn<number, TUnaryFn<number, TUnaryFn<number, number>>> = sa =>
+  sc => c => 255 - (255 - c) * (255 - sc * sa) / 255;
 
-const getLUT = (effect: TEffect): Array<Uint8ClampedArray | Array<number>> => {
+const getLUT = (effect: TEffect): Array<TUint8Array> => {
   const { curves, contrast, brightness, screen, saturation } = effect;
   let rMod = idFn;
   let gMod = idFn;
@@ -67,10 +72,10 @@ const getLUT = (effect: TEffect): Array<Uint8ClampedArray | Array<number>> => {
     gMod = compose(f(screen.g), gMod);
     bMod = compose(f(screen.b), bMod);
   }
-  const id_arr = (Uint8ClampedArray
+  const idArr = (Uint8ClampedArray
     ? new Uint8ClampedArray(256)
     : new Array(256).fill(1)).map((_, idx) => idx);
-  return [id_arr.map(rMod), id_arr.map(gMod), id_arr.map(bMod)];
+  return [idArr.map(rMod), idArr.map(gMod), idArr.map(bMod)];
 };
 
 // ApplyEffect :: SourceElement -> $Shape<Effect> -> Promise<TResult>
@@ -92,23 +97,21 @@ export default (
     const id = data.data.slice(0);
     const { sepia, saturation, viewfinder } = effect;
 
-    let r, g, b, ri, gi, bi;
     for (let i = id.length / 4; i >= 0; --i) {
-      ri = i << 2;
-      gi = ri + 1;
-      bi = ri + 2;
+      let ri = i << 2;
+      let gi = ri + 1;
+      let bi = ri + 2;
 
-      r = LUT[0][id[ri]];
-      g = LUT[1][id[gi]];
-      b = LUT[2][id[bi]];
+      let r = LUT[0][id[ri]];
+      let g = LUT[1][id[gi]];
+      let b = LUT[2][id[bi]];
 
       if (sepia) {
-        let _r = r * 0.393 + g * 0.769 + b * 0.189;
-        let _g = r * 0.349 + g * 0.686 + b * 0.168;
-        let _b = r * 0.272 + g * 0.534 + b * 0.131;
-        r = _r;
-        g = _g;
-        b = _b;
+        [r, g, b] = [
+          r * 0.393 + g * 0.769 + b * 0.189,
+          r * 0.349 + g * 0.686 + b * 0.168,
+          r * 0.272 + g * 0.534 + b * 0.131,
+        ];
       }
 
       if (saturation < 1) {

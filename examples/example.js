@@ -1,5 +1,11 @@
-import vintagejs from '../src/index.js';
-import { loadImage } from '../src/utils.js';
+// vintagejs = vintagejs.default;
+
+const loadImage = src => new Promise((resolve, reject) => {
+  const img = new Image();
+  img.onload = () => resolve(img);
+  img.onerror = err => reject(err);
+  img.src = src;
+});
 
 const compose = (f, g) => x => f(g(x));
 const idArr = new Uint8ClampedArray(256).map((_, i) => i);
@@ -43,11 +49,8 @@ const effect = {
 };
 
 const img = document.getElementById('picture');
-const resultImg = document.createElement('img');
-img.parentElement.appendChild(resultImg);
-
 vintagejs(img, effect).then(res => {
-  resultImg.src = res.getDataURL();
+  img.src = res.getDataURL();
 });
 
 const canvas = document.getElementById('canvas');
@@ -57,9 +60,7 @@ loadImage('./dude.jpg').then(img => {
   canvas.width = width;
   canvas.height = height;
   ctx.drawImage(img, 0, 0, width, height);
-  console.time();
   vintagejs(canvas, effect).then(res => {
-    console.timeEnd();
     ctx.drawImage(res.getCanvas(), 0, 0, width, height);
   });
 });
