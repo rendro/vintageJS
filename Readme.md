@@ -4,43 +4,44 @@ Add a retro/vintage effect to images using the HTML5 canvas element.
 ## How to use
 
 ```javascript
-// use an image as source
+vintagejs :: TSourceElement -> $Shape<TEffect> -> Promise<TResult>
+```
+
+The `vintagejs` function takes two arguments, a source element (image or canvas) and an effect object and returns a promise that resolves to a result object with the following methods:
+
+```javascript
+// returns the data url of the updated image. Use it to update the source of an existing image
+getDataURL(mimeType?: string, quality?: number): string;
+// returns the canvas with the updated image. Use it to draw your changes onto another canvas
+getCanvas(): HTMLCanvasElement;
+// returns a promise that resolves to an HTMLImageElement of the updated image
+genImage(mimeType?: string, quality?: number): Promise<HTMLImageElement>;
+```
+
+If not provided, mimeType defaults to `image/jpeg` and quality defaults to `1`.
+
+### Examples
+
+```javascript
+// use an image as source and update image with data url
 const srcEl = document.querySelector('img.myImage');
 vintagejs(srcEl, { brightness: 0.2 })
-  .then(res => res.getDataURL())
-  .then(url => {
-    srcEl.src = url;
-  })
-  .catch(err => console.log(err));
+  .then(res => {
+    srcEl.src = res.getDataURL();
+  });
 
-
-// use a canvas as source
+// use a canvas as source and draw result to canvas
 const srcEl = document.querySelector('canvas.myCanvas');
 const ctx = srcEl.getContext('2d');
 vintagejs(srcEl, { brightness: 0.2 })
-  .then(res => res.getCanvas())
-  .then(canvas => {
-    ctx.drawImage(canvas, 0, 0, srcEl.width, srcEl.height);
-  })
-  .then(err => console.log(err));
+  .then(res => {
+    ctx.drawImage(res.getCanvas(), 0, 0, srcEl.width, srcEl.height);
+  });
 ```
 
 ## Effect options
 
-Update effect documentation
-
 ```javascript
-type TRGBAColor = {
-  r: number,
-  g: number,
-  b: number,
-  a: number,
-};
-type TCurve = {
-  r: Array<number>,
-  g: Array<number>,
-  b: Array<number>,
-};
 type TEffect = {
   curves: false | TCurve,
   screen: false | TRGBAColor,
@@ -52,15 +53,29 @@ type TEffect = {
   brightness: number,
   contrast: number,
 };
+
+type TCurve = {
+  r: Array<Uint8> | Uint8ClampedArray,
+  g: Array<Uint8> | Uint8ClampedArray,
+  b: Array<Uint8> | Uint8ClampedArray,
+};
+
+type TRGBAColor = {
+  r: number, // Uint8
+  g: number, // Uint8
+  b: number, // Uint8
+  a: number, // float between 0 and 1
+};
 ```
 
 ## Browser support
-Check support for the canvas element: [canisue.com/canvas](http://caniuse.com/canvas)
-Higher performance of canvas blend modes are supported as well: [caniuse.com/#feat=canvas-blending](http://caniuse.com/#feat=canvas-blending)
+Check support for the canvas element [canisue.com/canvas](http://caniuse.com/canvas).
 
-## Open Source License
+Higher performance when canvas blend modes are supported [caniuse.com/#feat=canvas-blending](http://caniuse.com/#feat=canvas-blending), but fallbacks are implemented.
 
-vintageJS is dual licensed under the [MIT](http://www.opensource.org/licenses/mit-license.php) and [GPL](http://www.opensource.org/licenses/gpl-license.php) licenses.
+## License
+
+[MIT](http://www.opensource.org/licenses/mit-license.php)
 
 ## Changelog
 

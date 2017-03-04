@@ -5,18 +5,16 @@ var _index = require('../src/index.js');
 
 var _index2 = _interopRequireDefault(_index);
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _utils = require('../src/utils.js');
 
-var img = document.getElementById('picture');
-var resultImg = document.createElement('img');
-img.parentElement.appendChild(resultImg);
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var compose = function compose(f, g) {
   return function (x) {
     return f(g(x));
   };
 };
-var idArr = new Array(256).fill(1).map(function (_, i) {
+var idArr = new Uint8ClampedArray(256).map(function (_, i) {
   return i;
 });
 var rgb = function rgb(c) {
@@ -47,7 +45,7 @@ var curves2 = {
   b: idArr.map(rgb2)
 };
 
-(0, _index2.default)(img, {
+var effect = {
   vignette: 0.5,
   lighten: 0.3,
   brightness: -0.1,
@@ -62,15 +60,33 @@ var curves2 = {
     a: 0.15
   },
   sepia: true
-}).then(function (res) {
-  return res.getDataURL();
-}).then(function (dataUri) {
-  resultImg.src = dataUri;
-}, function (err) {
-  console.error(err);
+};
+
+var img = document.getElementById('picture');
+var resultImg = document.createElement('img');
+img.parentElement.appendChild(resultImg);
+
+(0, _index2.default)(img, effect).then(function (res) {
+  resultImg.src = res.getDataURL();
 });
 
-},{"../src/index.js":3}],2:[function(require,module,exports){
+var canvas = document.getElementById('canvas');
+var ctx = canvas.getContext('2d');
+(0, _utils.loadImage)('./dude.jpg').then(function (img) {
+  var width = img.width,
+      height = img.height;
+
+  canvas.width = width;
+  canvas.height = height;
+  ctx.drawImage(img, 0, 0, width, height);
+  console.time();
+  (0, _index2.default)(canvas, effect).then(function (res) {
+    console.timeEnd();
+    ctx.drawImage(res.getCanvas(), 0, 0, width, height);
+  });
+});
+
+},{"../src/index.js":3,"../src/utils.js":4}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {value: true});
@@ -170,14 +186,13 @@ var getLUT = function getLUT(effect) {
     gMod = (0, _utils.compose)(_f2(screen.g), gMod);
     bMod = (0, _utils.compose)(_f2(screen.b), bMod);
   }
-
-  var id_arr = new Array(256).fill(1).map(function (_, idx) {
+  var id_arr = (Uint8ClampedArray ? new Uint8ClampedArray(256) : new Array(256).fill(1)).map(function (_, idx) {
     return idx;
   });
   return [id_arr.map(rMod), id_arr.map(gMod), id_arr.map(bMod)];
 };
 
-// ApplyEffect :: SourceElement -> $Shape<Effect> -> Promise<string>
+// ApplyEffect :: SourceElement -> $Shape<Effect> -> Promise<TResult>
 
 exports.default = function (srcEl, partialEffect) {
   return new Promise(function (resolve, reject) {
@@ -286,7 +301,7 @@ exports.default = function (srcEl, partialEffect) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getResult = exports.loadImageWithCache = exports.loadImage = exports.getGradient = exports.getCanvasAndCtx = exports.createCanvasAndCtxFromImage = exports.compose = undefined;
+exports.getResult = exports.loadImageWithCache = exports.loadImage = exports.getGradient = exports.getCanvasAndCtx = exports.cloneCanvasAndCtx = exports.createCanvasAndCtxFromImage = exports.compose = undefined;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
@@ -317,12 +332,25 @@ var createCanvasAndCtxFromImage = exports.createCanvasAndCtxFromImage = function
   return [canvas, ctx];
 };
 
+var cloneCanvasAndCtx = exports.cloneCanvasAndCtx = function cloneCanvasAndCtx(source) {
+  var width = source.width,
+      height = source.height;
+
+  var target = document.createElement('canvas');
+  var targetCtx = (0, _nullthrows2.default)(target.getContext('2d'), 'Could not get 2d context for canvas');
+  target.width = width;
+  target.height = height;
+  targetCtx.drawImage(source, 0, 0, width, height);
+
+  return [target, targetCtx];
+};
+
 var getCanvasAndCtx = exports.getCanvasAndCtx = function getCanvasAndCtx(el) {
   if (el instanceof HTMLImageElement) {
     return createCanvasAndCtxFromImage(el);
   }
   if (el instanceof HTMLCanvasElement) {
-    return [el, (0, _nullthrows2.default)(el.getContext('2d'), 'Could not get 2d context for canvas')];
+    return cloneCanvasAndCtx(el);
   }
   throw new Error('Unsupported source element. Expected HTMLCanvasElement or HTMLImageElement, got ' + (typeof el === 'undefined' ? 'undefined' : _typeof(el)) + '.');
 };
@@ -369,7 +397,7 @@ var getResult = exports.getResult = function getResult(canvas) {
     getCanvas: function getCanvas() {
       return canvas;
     },
-    getImage: function getImage() {
+    genImage: function genImage() {
       var mimeType = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : IMAGE_TYPE;
       var quality = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : IMAGE_QUALITY;
 

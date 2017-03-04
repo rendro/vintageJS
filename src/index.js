@@ -25,7 +25,8 @@ const defaultEffect: TEffect = {
 };
 
 const idFn = (c: number): number => c;
-const curvesFn = (curves: Array<number>) => (c: number): number => curves[c];
+const curvesFn = (curves: Uint8ClampedArray | Array<number>) =>
+  (c: number): number => curves[c];
 const contrastFn = (f: number) =>
   (c: number): number =>
     259 * (f * 256 + 255) / (255 * (259 - f * 256)) * (c - 128) + 128;
@@ -34,7 +35,7 @@ const screenFn = (sa: number) =>
   (sc: number) =>
     (c: number): number => 255 - (255 - c) * (255 - sc * sa) / 255;
 
-const getLUT = (effect: TEffect): Array<Array<number>> => {
+const getLUT = (effect: TEffect): Array<Uint8ClampedArray | Array<number>> => {
   const { curves, contrast, brightness, screen, saturation } = effect;
   let rMod = idFn;
   let gMod = idFn;
@@ -66,12 +67,13 @@ const getLUT = (effect: TEffect): Array<Array<number>> => {
     gMod = compose(f(screen.g), gMod);
     bMod = compose(f(screen.b), bMod);
   }
-
-  const id_arr = new Array(256).fill(1).map((_, idx) => idx);
+  const id_arr = (Uint8ClampedArray
+    ? new Uint8ClampedArray(256)
+    : new Array(256).fill(1)).map((_, idx) => idx);
   return [id_arr.map(rMod), id_arr.map(gMod), id_arr.map(bMod)];
 };
 
-// ApplyEffect :: SourceElement -> $Shape<Effect> -> Promise<string>
+// ApplyEffect :: SourceElement -> $Shape<Effect> -> Promise<TResult>
 export default (
   srcEl: TSourceElement,
   partialEffect: $Shape<TEffect>,
