@@ -1,9 +1,10 @@
 # vintageJS
-> Add a retro/vintage effect to images using the HTML5 canvas element.
 
+> Add a retro/vintage effect to images using the HTML5 canvas element.
 
 [![npm](https://img.shields.io/npm/v/vintagejs.svg?style=flat-square)]()
 [![npm](https://img.shields.io/npm/l/vintagejs.svg?style=flat-square)]()
+[![Greenkeeper badge](https://badges.greenkeeper.io/rendro/vintageJS.svg)](https://greenkeeper.io/)
 
 ![](header.jpg)
 
@@ -12,7 +13,6 @@
 ```
 $ npm install vintagejs
 ```
-
 
 ## How to use
 
