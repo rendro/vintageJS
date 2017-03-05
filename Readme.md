@@ -1,13 +1,30 @@
 # vintageJS
-Add a retro/vintage effect to images using the HTML5 canvas element.
+> Add a retro/vintage effect to images using the HTML5 canvas element.
+
+
+[![npm](https://img.shields.io/npm/v/vintagejs.svg?style=flat-square)]()
+[![npm](https://img.shields.io/npm/l/vintagejs.svg?style=flat-square)]()
+
+![](header.jpg)
+
+## Installation
+
+```
+$ npm install vintagejs
+```
+
 
 ## How to use
 
+`vintagejs` is a function that takes a source (URL, ImageElement or CanvasElement) and an effect (object with all the options) and returns a Promise that resolves to a result object.
+
 ```javascript
-vintagejs :: TSourceElement -> $Shape<TEffect> -> Promise<TResult>
+vintagejs('./path/to/picture.jpg', { brightness: 0.2 })
+  .then(res => res.genImage())
+  .then(img => document.body.appendChild(img));
 ```
 
-The `vintagejs` function takes two arguments, a source (url, base64 data uri, image element or canvas element) and an effect object and returns a promise that resolves to a result object with the following methods:
+The result object provides the following methods to access the modified image data:
 
 ```javascript
 // returns the data url of the updated image. Use it to update the source of an existing image
@@ -20,7 +37,7 @@ genImage(mimeType?: string, quality?: number): Promise<HTMLImageElement>;
 
 If not provided, mimeType defaults to `image/jpeg` and quality defaults to `1`.
 
-### Examples
+### More Examples
 
 ```javascript
 // use an image as source and update image with data url
@@ -37,18 +54,9 @@ vintagejs(srcEl, { brightness: 0.2 })
   .then(res => {
     ctx.drawImage(res.getCanvas(), 0, 0, srcEl.width, srcEl.height);
   });
-
-// use a url (file path or data-uri) as source and insert result image into DOM
-vintagejs('./path/to/image.jpg', { brightness: 0.2 })
-  .then(res => res.genImage())
-  .then(img => {
-    document.body.appendChild(img);
-  });
 ```
 
 ## Effect options
-
-All properties on the effect object are optional. If you provide them however, you must follow these types:
 
 ```javascript
 type TEffect = {
@@ -114,35 +122,35 @@ Higher performance when canvas blend modes are supported [caniuse.com/#feat=canv
 
 ## Changelog
 
-### Version 2.1.0 - <small>Mar 5, 2017</small>
+### 2.1.0
 * Add support for strings (URI or base64 encoded data-uri) as a source
 
-### Version 2.0.0 - <small>Mar 4, 2017</small>
+### 2.0.0
 * Rewrite from ground up
 * Functional API
 
-### Version 1.1.5 - <small>May 16, 2016</small>
+### 1.1.5
 * Added "main" field to package.json
 
-### Version 1.1.4 - <small>Oct 24, 2013</small>
+### 1.1.4
 * Added universal module definition (umd) wrapper
 
-### Version 1.1.3 - <small>Nov 19, 2013</small>
+### 1.1.3
 * Added minified versions
 * Fixed same-origin error
 
-### Version 1.1.2 - <small>Jul 24, 2013</small>
+### 1.1.2
 * added AngularJS support thanks to [@dpiccone](https://github.com/dpiccone)
 * grunt based build script for all versions
 
-### Version 1.1.1 - <small>May 20, 2013</small>
+### 1.1.1
 * performance improvements
 * new effect options:
     * brightness
     * contrast
 
-### Version 1.1.0 - <small>May 19, 2013</small>
-* New and faster core
+### 1.1.0
+* Improved core performance
 
-### Version 1.0.0 - <small>Mar 17, 2011</small>
+### 1.0.0
 * Initial release
