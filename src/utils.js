@@ -1,6 +1,6 @@
 // @flow
 
-import type { TUnaryFn, TSourceElement, TResult } from './types.js';
+import type { TUnaryFn, TSource, TResult } from './types.js';
 
 import nullthrows from 'nullthrows';
 
@@ -49,7 +49,7 @@ export const cloneCanvasAndCtx = (
 };
 
 export const getCanvasAndCtx = (
-  el: TSourceElement,
+  el: HTMLCanvasElement | HTMLImageElement,
 ): [HTMLCanvasElement, CanvasRenderingContext2D] => {
   if (el instanceof HTMLImageElement) {
     return createCanvasAndCtxFromImage(el);

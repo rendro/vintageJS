@@ -35,7 +35,7 @@ const effect = {
   brightness: -0.1,
   contrast: 0.15,
   curves: curves2,
-  saturation: 0.7,
+  saturation: 0.8,
   viewfinder: './film-1.jpg',
   screen: {
     r: 227,
@@ -43,8 +43,11 @@ const effect = {
     b: 169,
     a: 0.15,
   },
-  sepia: true,
 };
+
+vintagejs('./dude.jpg', effect).then(res => res.genImage()).then(img => {
+  document.body.appendChild(img);
+});
 
 const img = document.getElementById('picture');
 vintagejs(img, effect).then(res => {

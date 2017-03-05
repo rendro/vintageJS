@@ -6,7 +6,7 @@ export type TUnaryFn<A, B> = (a: A) => B;
 
 export type TPixel = [number, number, number];
 
-export type TSourceElement = HTMLImageElement | HTMLCanvasElement;
+export type TSource = string | HTMLImageElement | HTMLCanvasElement;
 
 export type TRGBAColor = {
   +r: number,

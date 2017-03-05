@@ -7,7 +7,7 @@ Add a retro/vintage effect to images using the HTML5 canvas element.
 vintagejs :: TSourceElement -> $Shape<TEffect> -> Promise<TResult>
 ```
 
-The `vintagejs` function takes two arguments, a source element (image or canvas) and an effect object and returns a promise that resolves to a result object with the following methods:
+The `vintagejs` function takes two arguments, a source (url, base64 data uri, image element or canvas element) and an effect object and returns a promise that resolves to a result object with the following methods:
 
 ```javascript
 // returns the data url of the updated image. Use it to update the source of an existing image
@@ -36,6 +36,13 @@ const ctx = srcEl.getContext('2d');
 vintagejs(srcEl, { brightness: 0.2 })
   .then(res => {
     ctx.drawImage(res.getCanvas(), 0, 0, srcEl.width, srcEl.height);
+  });
+
+// use a url (file path or data-uri) as source and insert result image into DOM
+vintagejs('./path/to/image.jpg', { brightness: 0.2 })
+  .then(res => res.genImage())
+  .then(img => {
+    document.body.appendChild(img);
   });
 ```
 
@@ -107,7 +114,10 @@ Higher performance when canvas blend modes are supported [caniuse.com/#feat=canv
 
 ## Changelog
 
-### Version 2.0.0 - <small>Mar, 2017</small>
+### Version 2.1.0 - <small>Mar 5, 2017</small>
+* Add support for strings (URI or base64 encoded data-uri) as a source
+
+### Version 2.0.0 - <small>Mar 4, 2017</small>
 * Rewrite from ground up
 * Functional API
 

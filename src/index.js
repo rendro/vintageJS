@@ -2,10 +2,10 @@
 
 import type {
   TEffect,
-  TSourceElement,
   TResult,
-  TUnaryFn,
+  TSource,
   TUint8Array,
+  TUnaryFn,
 } from './types.js';
 
 import {
@@ -78,83 +78,80 @@ const getLUT = (effect: TEffect): Array<TUint8Array> => {
   return [idArr.map(rMod), idArr.map(gMod), idArr.map(bMod)];
 };
 
-// ApplyEffect :: SourceElement -> $Shape<Effect> -> Promise<TResult>
-export default (
-  srcEl: TSourceElement,
-  partialEffect: $Shape<TEffect>,
-): Promise<TResult> =>
-  new Promise((resolve, reject) => {
-    const effect = {
-      ...defaultEffect,
-      ...partialEffect,
-    };
-    const LUT = getLUT(effect);
-    const [canvas, ctx] = getCanvasAndCtx(srcEl);
-    const { width, height } = canvas;
-    ctx.globalCompositeOperation = 'multiply';
-    const supportsBlendModes = ctx.globalCompositeOperation === 'multiply';
-    const data = ctx.getImageData(0, 0, width, height);
-    const id = data.data.slice(0);
-    const { sepia, saturation, viewfinder } = effect;
+const applyEffect = (effect: TEffect) => {
+  const LUT = getLUT(effect);
+  return (
+    [canvas, ctx]: [HTMLCanvasElement, CanvasRenderingContext2D],
+  ): Promise<TResult> =>
+    new Promise((resolve, reject) => {
+      const { width, height } = canvas;
+      ctx.globalCompositeOperation = 'multiply';
+      const supportsBlendModes = ctx.globalCompositeOperation === 'multiply';
+      const data = ctx.getImageData(0, 0, width, height);
+      const id = data.data.slice(0);
+      const { sepia, saturation } = effect;
 
-    for (let i = id.length / 4; i >= 0; --i) {
-      let ri = i << 2;
-      let gi = ri + 1;
-      let bi = ri + 2;
+      for (let i = id.length / 4; i >= 0; --i) {
+        let ri = i << 2;
+        let gi = ri + 1;
+        let bi = ri + 2;
 
-      let r = LUT[0][id[ri]];
-      let g = LUT[1][id[gi]];
-      let b = LUT[2][id[bi]];
+        let r = LUT[0][id[ri]];
+        let g = LUT[1][id[gi]];
+        let b = LUT[2][id[bi]];
 
-      if (sepia) {
-        [r, g, b] = [
-          r * 0.393 + g * 0.769 + b * 0.189,
-          r * 0.349 + g * 0.686 + b * 0.168,
-          r * 0.272 + g * 0.534 + b * 0.131,
-        ];
+        if (sepia) {
+          [r, g, b] = [
+            r * 0.393 + g * 0.769 + b * 0.189,
+            r * 0.349 + g * 0.686 + b * 0.168,
+            r * 0.272 + g * 0.534 + b * 0.131,
+          ];
+        }
+
+        if (saturation < 1) {
+          const avg = (r + g + b) / 3;
+          r += (avg - r) * (1 - saturation);
+          g += (avg - g) * (1 - saturation);
+          b += (avg - b) * (1 - saturation);
+        }
+
+        id[ri] = r;
+        id[gi] = g;
+        id[bi] = b;
       }
 
-      if (saturation < 1) {
-        const avg = (r + g + b) / 3;
-        r += (avg - r) * (1 - saturation);
-        g += (avg - g) * (1 - saturation);
-        b += (avg - b) * (1 - saturation);
+      data.data.set(id);
+      ctx.putImageData(data, 0, 0);
+
+      if (effect.vignette) {
+        ctx.globalCompositeOperation = supportsBlendModes
+          ? 'multiply'
+          : 'source-over';
+        ctx.fillStyle = getGradient(ctx, width, height, [
+          'rgba(0,0,0,0)',
+          'rgba(0,0,0,0)',
+          `rgba(0,0,0,${effect.vignette})`,
+        ]);
+        ctx.fillRect(0, 0, width, height);
       }
 
-      id[ri] = r;
-      id[gi] = g;
-      id[bi] = b;
-    }
+      if (effect.lighten) {
+        ctx.globalCompositeOperation = supportsBlendModes
+          ? 'screen'
+          : 'lighter';
+        ctx.fillStyle = getGradient(ctx, width, height, [
+          `rgba(255,255,255,${effect.lighten})`,
+          'rgba(255,255,255,0)',
+          'rgba(0,0,0,0)',
+        ]);
+        ctx.fillRect(0, 0, width, height);
+      }
 
-    data.data.set(id);
-    ctx.putImageData(data, 0, 0);
+      if (!effect.viewfinder) {
+        return resolve(getResult(canvas));
+      }
 
-    if (effect.vignette) {
-      ctx.globalCompositeOperation = supportsBlendModes
-        ? 'multiply'
-        : 'source-over';
-      ctx.fillStyle = getGradient(ctx, width, height, [
-        'rgba(0,0,0,0)',
-        'rgba(0,0,0,0)',
-        `rgba(0,0,0,${effect.vignette})`,
-      ]);
-      ctx.fillRect(0, 0, width, height);
-    }
-
-    if (effect.lighten) {
-      ctx.globalCompositeOperation = supportsBlendModes ? 'screen' : 'lighter';
-      ctx.fillStyle = getGradient(ctx, width, height, [
-        `rgba(255,255,255,${effect.lighten})`,
-        'rgba(255,255,255,0)',
-        'rgba(0,0,0,0)',
-      ]);
-      ctx.fillRect(0, 0, width, height);
-    }
-
-    if (!viewfinder) {
-      resolve(getResult(canvas));
-    } else {
-      return loadImageWithCache(viewfinder).then(img => {
+      return loadImageWithCache(effect.viewfinder).then(img => {
         if (supportsBlendModes) {
           ctx.globalCompositeOperation = 'multiply';
           ctx.drawImage(img, 0, 0, width, height);
@@ -165,7 +162,25 @@ export default (
           imageData.data.set(imageData.data.map((v, i) => v * vfData[i] / 255));
           ctx.putImageData(imageData, 0, 0);
         }
-        resolve(getResult(canvas));
+
+        return resolve(getResult(canvas));
       });
-    }
-  });
+    });
+};
+
+// vintagejs :: TSource -> $Shape<TEffect> -> Promise<TResult>
+export default (
+  src: TSource,
+  partialEffect: $Shape<TEffect>,
+): Promise<TResult> => {
+  const genSource = typeof src === 'string'
+    ? loadImage(src).then(getCanvasAndCtx)
+    : Promise.resolve(getCanvasAndCtx(src));
+
+  return genSource.then(
+    applyEffect({
+      ...defaultEffect,
+      ...partialEffect,
+    }),
+  );
+};

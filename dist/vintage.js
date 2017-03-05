@@ -17,9 +17,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
 var _utils = require('./utils.js');
 
@@ -104,77 +104,73 @@ var getLUT = function getLUT(effect) {
   return [idArr.map(rMod), idArr.map(gMod), idArr.map(bMod)];
 };
 
-// ApplyEffect :: SourceElement -> $Shape<Effect> -> Promise<TResult>
+var applyEffect = function applyEffect(effect) {
+  var LUT = getLUT(effect);
+  return function (_ref) {
+    var _ref2 = _slicedToArray(_ref, 2),
+        canvas = _ref2[0],
+        ctx = _ref2[1];
 
-exports.default = function (srcEl, partialEffect) {
-  return new Promise(function (resolve, reject) {
-    var effect = _extends({}, defaultEffect, partialEffect);
-    var LUT = getLUT(effect);
+    return new Promise(function (resolve, reject) {
+      var width = canvas.width,
+          height = canvas.height;
 
-    var _getCanvasAndCtx = (0, _utils.getCanvasAndCtx)(srcEl),
-        _getCanvasAndCtx2 = _slicedToArray(_getCanvasAndCtx, 2),
-        canvas = _getCanvasAndCtx2[0],
-        ctx = _getCanvasAndCtx2[1];
-
-    var width = canvas.width,
-        height = canvas.height;
-
-    ctx.globalCompositeOperation = 'multiply';
-    var supportsBlendModes = ctx.globalCompositeOperation === 'multiply';
-    var data = ctx.getImageData(0, 0, width, height);
-    var id = data.data.slice(0);
-    var sepia = effect.sepia,
-        saturation = effect.saturation,
-        viewfinder = effect.viewfinder;
+      ctx.globalCompositeOperation = 'multiply';
+      var supportsBlendModes = ctx.globalCompositeOperation === 'multiply';
+      var data = ctx.getImageData(0, 0, width, height);
+      var id = data.data.slice(0);
+      var sepia = effect.sepia,
+          saturation = effect.saturation;
 
 
-    for (var i = id.length / 4; i >= 0; --i) {
-      var ri = i << 2;
-      var gi = ri + 1;
-      var bi = ri + 2;
+      for (var i = id.length / 4; i >= 0; --i) {
+        var ri = i << 2;
+        var gi = ri + 1;
+        var bi = ri + 2;
 
-      var r = LUT[0][id[ri]];
-      var g = LUT[1][id[gi]];
-      var b = LUT[2][id[bi]];
+        var r = LUT[0][id[ri]];
+        var g = LUT[1][id[gi]];
+        var b = LUT[2][id[bi]];
 
-      if (sepia) {
-        var _ref = [r * 0.393 + g * 0.769 + b * 0.189, r * 0.349 + g * 0.686 + b * 0.168, r * 0.272 + g * 0.534 + b * 0.131];
-        r = _ref[0];
-        g = _ref[1];
-        b = _ref[2];
+        if (sepia) {
+          var _ref3 = [r * 0.393 + g * 0.769 + b * 0.189, r * 0.349 + g * 0.686 + b * 0.168, r * 0.272 + g * 0.534 + b * 0.131];
+          r = _ref3[0];
+          g = _ref3[1];
+          b = _ref3[2];
+        }
+
+        if (saturation < 1) {
+          var avg = (r + g + b) / 3;
+          r += (avg - r) * (1 - saturation);
+          g += (avg - g) * (1 - saturation);
+          b += (avg - b) * (1 - saturation);
+        }
+
+        id[ri] = r;
+        id[gi] = g;
+        id[bi] = b;
       }
 
-      if (saturation < 1) {
-        var avg = (r + g + b) / 3;
-        r += (avg - r) * (1 - saturation);
-        g += (avg - g) * (1 - saturation);
-        b += (avg - b) * (1 - saturation);
+      data.data.set(id);
+      ctx.putImageData(data, 0, 0);
+
+      if (effect.vignette) {
+        ctx.globalCompositeOperation = supportsBlendModes ? 'multiply' : 'source-over';
+        ctx.fillStyle = (0, _utils.getGradient)(ctx, width, height, ['rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'rgba(0,0,0,' + effect.vignette + ')']);
+        ctx.fillRect(0, 0, width, height);
       }
 
-      id[ri] = r;
-      id[gi] = g;
-      id[bi] = b;
-    }
+      if (effect.lighten) {
+        ctx.globalCompositeOperation = supportsBlendModes ? 'screen' : 'lighter';
+        ctx.fillStyle = (0, _utils.getGradient)(ctx, width, height, ['rgba(255,255,255,' + effect.lighten + ')', 'rgba(255,255,255,0)', 'rgba(0,0,0,0)']);
+        ctx.fillRect(0, 0, width, height);
+      }
 
-    data.data.set(id);
-    ctx.putImageData(data, 0, 0);
+      if (!effect.viewfinder) {
+        return resolve((0, _utils.getResult)(canvas));
+      }
 
-    if (effect.vignette) {
-      ctx.globalCompositeOperation = supportsBlendModes ? 'multiply' : 'source-over';
-      ctx.fillStyle = (0, _utils.getGradient)(ctx, width, height, ['rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'rgba(0,0,0,' + effect.vignette + ')']);
-      ctx.fillRect(0, 0, width, height);
-    }
-
-    if (effect.lighten) {
-      ctx.globalCompositeOperation = supportsBlendModes ? 'screen' : 'lighter';
-      ctx.fillStyle = (0, _utils.getGradient)(ctx, width, height, ['rgba(255,255,255,' + effect.lighten + ')', 'rgba(255,255,255,0)', 'rgba(0,0,0,0)']);
-      ctx.fillRect(0, 0, width, height);
-    }
-
-    if (!viewfinder) {
-      resolve((0, _utils.getResult)(canvas));
-    } else {
-      return (0, _utils.loadImageWithCache)(viewfinder).then(function (img) {
+      return (0, _utils.loadImageWithCache)(effect.viewfinder).then(function (img) {
         if (supportsBlendModes) {
           ctx.globalCompositeOperation = 'multiply';
           ctx.drawImage(img, 0, 0, width, height);
@@ -193,10 +189,19 @@ exports.default = function (srcEl, partialEffect) {
           }));
           ctx.putImageData(imageData, 0, 0);
         }
-        resolve((0, _utils.getResult)(canvas));
+
+        return resolve((0, _utils.getResult)(canvas));
       });
-    }
-  });
+    });
+  };
+};
+
+// vintagejs :: TSource -> $Shape<TEffect> -> Promise<TResult>
+
+exports.default = function (src, partialEffect) {
+  var genSource = typeof src === 'string' ? (0, _utils.loadImage)(src).then(_utils.getCanvasAndCtx) : Promise.resolve((0, _utils.getCanvasAndCtx)(src));
+
+  return genSource.then(applyEffect(_extends({}, defaultEffect, partialEffect)));
 };
 
 module.exports = exports['default'];
