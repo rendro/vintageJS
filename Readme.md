@@ -1,4 +1,6 @@
 # vintageJS
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/rendro/vintageJS.svg)](https://greenkeeper.io/)
 > Add a retro/vintage effect to images using the HTML5 canvas element.
 
 
