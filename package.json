@@ -1,20 +1,38 @@
 {
   "name": "vintageJS",
   "description": "Add a retro/vintage effect to images using the HTML5 canvas element",
-  "license": "Dual licensed under the MIT (http://www.opensource.org/licenses/mit-license.php) and GPL (http://www.opensource.org/licenses/gpl-license.php) licenses.",
-  "version": "1.1.5",
+  "license": "MIT",
+  "version": "2.0.0",
   "author": {
     "name": "Robert Fleischmann",
     "email": "rendro87@gmail.com",
-    "url": "http://robert-fleischmann.de"
+    "url": "https://robert-fleischmann.com"
   },
   "main": "./dist/vintage.js",
+  "scripts": {
+    "build": "npm run build-module; npm run minify-module",
+    "build-module": "browserify ./src/index.js -s vintagejs -t babelify > ./dist/vintage.js",
+    "minify-module": "uglifyjs ./dist/vintage.js > ./dist/vintage.min.js",
+    "test": "mocha --require babel-register"
+  },
+  "dependencies": {
+    "nullthrows": "^1.0.0"
+  },
   "devDependencies": {
-    "grunt": "*",
-    "grunt-contrib-uglify": "*",
-    "grunt-contrib-concat": "*",
-    "grunt-banner": "*",
-    "grunt-umd": "https://github.com/alexlawrence/grunt-umd/archive/master.tar.gz",
-    "grunt-contrib-clean": "~0.5.0"
+    "assert": "^1.4.1",
+    "babel-cli": "^6.23.0",
+    "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-plugin-syntax-flow": "^6.18.0",
+    "babel-plugin-transform-flow-strip-types": "^6.22.0",
+    "babel-preset-es2015": "^6.22.0",
+    "babel-preset-stage-0": "^6.22.0",
+    "babelify": "^7.3.0",
+    "browserify": "^14.1.0",
+    "expect.js": "^0.3.1",
+    "flow-bin": "^0.39.0",
+    "flow-typed": "^2.0.0",
+    "mocha": "^3.2.0",
+    "sinon": "^1.17.7",
+    "uglify-js": "^2.8.5"
   }
 }

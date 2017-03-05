@@ -2,195 +2,114 @@
 Add a retro/vintage effect to images using the HTML5 canvas element.
 
 ## How to use
-You can decide to use vintageJS as a jQuery plugin, as an [AngularJS](http://angularjs.org/) module or implement the vanilla version without any dependencies.
 
-### jQuery
+```javascript
+vintagejs :: TSourceElement -> $Shape<TEffect> -> Promise<TResult>
+```
 
-The jQuery version works with `jQuery 1.2.3+`
+The `vintagejs` function takes two arguments, a source element (image or canvas) and an effect object and returns a promise that resolves to a result object with the following methods:
 
-    <script src="//code.jquery.com/jquery-2.0.0.min.js"></script>
-    <script src="jquery.vintage.js"></script>
-    <script>
-        var options = {
-            onError: function() {
-                alert('ERROR');
-            }
-        };
-        var effect = {
-            vignette: 0.6,
-            sepia: true
-        };
-        $('img#yourImage').vintage(options, effect);
-    </script>
+```javascript
+// returns the data url of the updated image. Use it to update the source of an existing image
+getDataURL(mimeType?: string, quality?: number): string;
+// returns the canvas with the updated image. Use it to draw your changes onto another canvas
+getCanvas(): HTMLCanvasElement;
+// returns a promise that resolves to an HTMLImageElement of the updated image
+genImage(mimeType?: string, quality?: number): Promise<HTMLImageElement>;
+```
 
-### vanilla
+If not provided, mimeType defaults to `image/jpeg` and quality defaults to `1`.
 
-    <script src="vintage.js"></script>
-    <script>
-        var img = document.getElementById('yourImage');
-        var options = {
-            onError: function() {
-                alert('ERROR');
-            }
-        };
-        var effect = {
-            vignette: 0.6,
-            sepia: true
-        };
-        new VintageJS(img, options, effect);
-    </script>
+### Examples
 
-### AngularJs
+```javascript
+// use an image as source and update image with data url
+const srcEl = document.querySelector('img.myImage');
+vintagejs(srcEl, { brightness: 0.2 })
+  .then(res => {
+    srcEl.src = res.getDataURL();
+  });
 
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>
-    <script src="angular.vintage.js"></script>
-    <script>
-        var app = angular.module('app',['vintagejs']);
-    </script>
-
-And the html...
-
-    <img vintage="option:value;option:value;.." src="picture.jpg" />
-
-
-## Options
-
-You can configure vintageJS with the following options:
-
-<table>
-    <tr>
-        <td><code>onStart</code></td>
-        <td>Callback function that is executed before the effect is calculated</td>
-    </tr>
-    <tr>
-        <td><code>onStop</code></td>
-        <td>Callback function that is executed after the effect is renderd</td>
-    </tr>
-    <tr>
-        <td><code>onError</code></td>
-        <td>Callback function that is executed if any error occures</td>
-    </tr>
-    <tr>
-        <td><code>mime</code></td>
-        <td>Mime type of the output image. Default is <code>image/jpeg</code></td>
-    </tr>
-</table>
+// use a canvas as source and draw result to canvas
+const srcEl = document.querySelector('canvas.myCanvas');
+const ctx = srcEl.getContext('2d');
+vintagejs(srcEl, { brightness: 0.2 })
+  .then(res => {
+    ctx.drawImage(res.getCanvas(), 0, 0, srcEl.width, srcEl.height);
+  });
+```
 
 ## Effect options
 
-In the `vintage.presets.js` file you find a few presets to see how the options work. If you have built a great effect by yourself, do not hesitate to send a pull request, I appreciate every contribution.
+All properties on the effect object are optional. If you provide them however, you must follow these types:
 
-<table>
-    <tr>
-        <th>Name</th>
-        <th>Value</th>
-        <th>Description</th>
-    </tr>
-    <tr>
-        <td><code>brightness</code></td>
-        <td><i>integer</i> from -255 to 255</td>
-        <td>Change the brightness of the image</td>
-    </tr>
-    <tr>
-        <td><code>contrast</code></td>
-        <td><i>integer</i> from -255 to 255</td>
-        <td>Increase or decrease the contrast of the image</td>
-    </tr>
-    <tr>
-        <td><code>vignette</code></td>
-        <td><i>float</i> from 0 to 1</td>
-        <td>A black vignette a the edges of the image</td>
-    </tr>
-    <tr>
-        <td><code>lighten</code></td>
-        <td><i>float</i> from 0 to 1</td>
-        <td>Lighten the center of the image</td>
-    </tr>
-    <tr>
-        <td><code>desaturate</code></td>
-        <td><i>float</i> from 0 to 1</td>
-        <td>Desaturate the image</td>
-    </tr>
-    <tr>
-        <td><code>noise</code></td>
-        <td><i>integer</i></td>
-        <td>Add a noise to the image. The bigger the number the stronger the noise</td>
-    </tr>
-    <tr>
-        <td><code>sepia</code></td>
-        <td><i>boolean</i></td>
-        <td>Sepia effect</td>
-    </tr>
-    <tr>
-        <td><code>viewFinder</code></td>
-        <td><i>string</i>: path to image</td>
-        <td>Add a viewfinder image</td>
-    </tr>
-    <tr>
-        <td><code>screen</code></td>
-        <td><i>object</i></td>
-        <td>Screen in another color. The object must have the following structure: <pre><code>{
-    r: (int)[0-255],
-    g: (int)[0-255],
-    b: (int)[0-255],
-    a: (float):[0-1]
-}</code></pre>
-<code>r,b,g</code> represent the color and <code>a</code> defines the strength of the screen.
-</td>
-    </tr>
-    <tr>
-        <td><code>curves</code></td>
-        <td><i>object</i></td>
-        <td>Map one color value to another by providing an object with the properties <code>r,g,b</code> each containing an array with 256 enties for the color mapping: <pre><code>{
-    r: (intArray){256}[0-255],
-    g: (intArray){256}[0-255],
-    b: (intArray){256}[0-255]
-}</code></pre>
-<code>r,b,g</code> representing the color channels
-</td>
-    </tr>
-</table>
+```javascript
+type TEffect = {
+  curves: false | TCurve,     // default: false
+  screen: false | TRGBAColor, // default: false
+  saturation: number,         // float between 0 and 1, default: 1
+  vignette: number,           // float between 0 and 1, default: 0
+  lighten: number,            // float between 0 and 1, default: 0
+  viewfinder: false | string, // string must be URL, default: false
+  sepia: boolean,             // default: false
+  brightness: number,         // float between -1 and 1, default: 0
+  contrast: number,           // float between -1 and 1, default: 0
+};
 
-## vintage-API
+// every channel, r=red, g=green, b=blue serves as a look up table for color mappings
+type TCurve = {
+  r: Array<Uint8> | Uint8ClampedArray, // array of int between 0 and 255, length of array === 256
+  g: Array<Uint8> | Uint8ClampedArray, // array of int between 0 and 255, length of array === 256
+  b: Array<Uint8> | Uint8ClampedArray, // array of int between 0 and 255, length of array === 256
+};
 
-Every instance of vintageJS returns an API object to manipulate the image. In the jQuery version this API is stored in the data of the element and can be accessed in the following way:
+type TRGBAColor = {
+  r: Uint8,  // int between 0 and 255
+  g: Uint8,  // int between 0 and 255
+  b: Uint8,  // int between 0 and 255
+  a: number, // float between 0 and 1
+};
+```
 
-    var vjsAPI = $('#yourImage').data('vintageJS');
+### Examples
 
-The API has the following three methods:
+```javascript
+const noEffect = {};
 
-<table>
-    <tr>
-        <td><code>vintage(effect)</code></td>
-        <td>Render a new effect for the image. The current effect will be overwritten.</td>
-    </tr>
-    <tr>
-        <td><code>apply()</code></td>
-        <td>Apply the current effect on the image. All further effects are rendered on the basis of the current state of the image. Use this method if you want to render multiple effects on one image.</td>
-    </tr>
-    <tr>
-        <td><code>reset()</code></td>
-        <td>Reset the image to the original state (or the last applied state).</td>
-    </tr>
-</table>
+const effect_1 = {
+  brightness: -0.2,
+  contrast: 0.15,
+};
+
+const effect_2 = {
+  brightness: 0.1,
+  vignette: 0.3,
+  viewfinder: './film-1.jpg',
+  screen: {
+    r: 227,
+    g: 12,
+    b: 169,
+    a: 0.15,
+  },
+};
+```
+
+See examples folder for more examples.
 
 ## Browser support
+Check support for the canvas element [canisue.com/canvas](http://caniuse.com/canvas).
 
-As vintageJS relies on the HTML5 canvas element it supports the following browsers:
+Higher performance when canvas blend modes are supported [caniuse.com/#feat=canvas-blending](http://caniuse.com/#feat=canvas-blending), but fallbacks are implemented.
 
-* Mozilla Firefox
-* Google Chrome
-* Apple Safari
-* Opera
-* Internet Explorer 9+
+## License
 
-See more details on [canisue.com/canvas](http://caniuse.com/canvas).
-
-## Open Source License
-
-vintageJS is dual licensed under the [MIT](http://www.opensource.org/licenses/mit-license.php) and [GPL](http://www.opensource.org/licenses/gpl-license.php) licenses.
+[MIT](http://www.opensource.org/licenses/mit-license.php)
 
 ## Changelog
+
+### Version 2.0.0 - <small>Mar, 2017</small>
+* Rewrite from ground up
+* Functional API
 
 ### Version 1.1.5 - <small>May 16, 2016</small>
 * Added "main" field to package.json
