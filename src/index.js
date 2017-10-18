@@ -26,6 +26,7 @@ const defaultEffect: TEffect = {
   lighten: 0,
   viewfinder: false,
   sepia: false,
+  gray: false,
   brightness: 0,
   contrast: 0,
 };
@@ -89,7 +90,7 @@ const applyEffect = (effect: TEffect) => {
       const supportsBlendModes = ctx.globalCompositeOperation === 'multiply';
       const data = ctx.getImageData(0, 0, width, height);
       const id = data.data.slice(0);
-      const { sepia, saturation } = effect;
+      const { sepia, saturation, gray } = effect;
 
       for (let i = id.length / 4; i >= 0; --i) {
         let ri = i << 2;
@@ -105,6 +106,14 @@ const applyEffect = (effect: TEffect) => {
             r * 0.393 + g * 0.769 + b * 0.189,
             r * 0.349 + g * 0.686 + b * 0.168,
             r * 0.272 + g * 0.534 + b * 0.131,
+          ];
+        }
+
+        if (gray) {
+          [r, g, b] = [
+            r * 0.21 + g * 0.72 + b * 0.07,
+            r * 0.21 + g * 0.72 + b * 0.07,
+            r * 0.21 + g * 0.72 + b * 0.07
           ];
         }
 
