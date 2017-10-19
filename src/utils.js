@@ -88,6 +88,7 @@ export const loadImage = (src: string): Promise<Image> => new Promise((
 ) => {
   const img = new Image();
   img.onload = () => resolve(img);
+  img.crossOrigin = 'anonymous';
   img.onerror = (err: Error): void => reject(err);
   img.src = src;
 });

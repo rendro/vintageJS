@@ -289,6 +289,7 @@ var loadImage = exports.loadImage = function loadImage(src) {
     img.onload = function () {
       return resolve(img);
     };
+    img.crossOrigin = 'anonymous';
     img.onerror = function (err) {
       return reject(err);
     };
