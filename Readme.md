@@ -67,6 +67,7 @@ type TEffect = {
   lighten: number,            // float between 0 and 1, default: 0
   viewfinder: false | string, // string must be URL, default: false
   sepia: boolean,             // default: false
+  gray: boolean,              // default: false
   brightness: number,         // float between -1 and 1, default: 0
   contrast: number,           // float between -1 and 1, default: 0
 };
@@ -121,6 +122,9 @@ Higher performance when canvas blend modes are supported [caniuse.com/#feat=canv
 [MIT](http://www.opensource.org/licenses/mit-license.php)
 
 ## Changelog
+
+### 2.2.0
+* Added true grayscale effect (Thanks @bjornbos for PR #38)
 
 ### 2.1.0
 * Add support for strings (URI or base64 encoded data-uri) as a source

@@ -29,6 +29,7 @@ export type TEffect = {
   +lighten: number,
   +viewfinder: false | string,
   +sepia: boolean,
+  +gray: boolean,
   +brightness: number,
   +contrast: number,
 };

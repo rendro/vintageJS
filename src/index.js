@@ -113,7 +113,7 @@ const applyEffect = (effect: TEffect) => {
           [r, g, b] = [
             r * 0.21 + g * 0.72 + b * 0.07,
             r * 0.21 + g * 0.72 + b * 0.07,
-            r * 0.21 + g * 0.72 + b * 0.07
+            r * 0.21 + g * 0.72 + b * 0.07,
           ];
         }
 
@@ -186,10 +186,8 @@ export default (
     ? loadImage(src).then(getCanvasAndCtx)
     : Promise.resolve(getCanvasAndCtx(src));
 
-  return genSource.then(
-    applyEffect({
+  return genSource.then(applyEffect({
       ...defaultEffect,
       ...partialEffect,
-    }),
-  );
+    }));
 };
