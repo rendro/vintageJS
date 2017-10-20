@@ -31,6 +31,7 @@ var defaultEffect = {
   lighten: 0,
   viewfinder: false,
   sepia: false,
+  gray: false,
   brightness: 0,
   contrast: 0
 };
@@ -120,7 +121,8 @@ var applyEffect = function applyEffect(effect) {
       var data = ctx.getImageData(0, 0, width, height);
       var id = data.data.slice(0);
       var sepia = effect.sepia,
-          saturation = effect.saturation;
+          saturation = effect.saturation,
+          gray = effect.gray;
 
 
       for (var i = id.length / 4; i >= 0; --i) {
@@ -137,6 +139,13 @@ var applyEffect = function applyEffect(effect) {
           r = _ref3[0];
           g = _ref3[1];
           b = _ref3[2];
+        }
+
+        if (gray) {
+          var _ref4 = [r * 0.21 + g * 0.72 + b * 0.07, r * 0.21 + g * 0.72 + b * 0.07, r * 0.21 + g * 0.72 + b * 0.07];
+          r = _ref4[0];
+          g = _ref4[1];
+          b = _ref4[2];
         }
 
         if (saturation < 1) {
@@ -280,6 +289,7 @@ var loadImage = exports.loadImage = function loadImage(src) {
     img.onload = function () {
       return resolve(img);
     };
+    img.crossOrigin = 'anonymous';
     img.onerror = function (err) {
       return reject(err);
     };
