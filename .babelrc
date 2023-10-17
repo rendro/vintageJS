@@ -1,4 +1,4 @@
 {
-  "plugins": ["syntax-flow", "transform-flow-strip-types", "add-module-exports"],
-  "presets": ["es2015", "stage-0"]
+  "plugins": ["babel-plugin-add-module-exports"],
+  "presets": ["@babel/preset-env", "@babel/preset-flow"]
 }
