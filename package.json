@@ -2,49 +2,38 @@
   "name": "vintagejs",
   "description": "Add a retro/vintage effect to images using the HTML5 canvas element",
   "license": "MIT",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "author": {
     "name": "Robert Fleischmann",
     "email": "rendro87@gmail.com",
     "url": "https://robert-fleischmann.com"
   },
   "main": "./dist/vintage.js",
+  "module": "./dist/vintage.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/vintage.mjs",
+      "require": "./dist/vintage.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
   "scripts": {
-    "build": "npm run build-module; npm run minify-module",
-    "build-module": "browserify ./src/index.js -s vintagejs > ./dist/vintage.js",
-    "minify-module": "uglifyjs ./dist/vintage.js > ./dist/vintage.min.js",
-    "test": "mocha --require @babel/register"
+    "build": "vite build && vite build --mode min && tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "nullthrows": "^1.0.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.23.2",
-    "@babel/preset-env": "^7.23.2",
-    "@babel/preset-flow": "^7.22.15",
-    "@babel/register": "^7.22.15",
-    "assert": "^2.1.0",
-    "babel-plugin-add-module-exports": "^1.0.4",
-    "babelify": "^10.0.0",
-    "browserify": "^17.0.0",
-    "expect.js": "^0.3.1",
-    "flow-bin": "^0.218.1",
-    "flow-typed": "^3.9.0",
-    "mocha": "^10.2.0",
-    "sinon": "^16.1.0",
-    "uglify-js": "^3.17.4"
-  },
-  "browserify": {
-    "transform": [
-      [
-        "babelify",
-        {
-          "presets": [
-            "@babel/preset-env",
-            "@babel/preset-flow"
-          ]
-        }
-      ]
-    ]
+    "typescript": "^5.6.3",
+    "vite": "^7.3.6",
+    "vitest": "^3.2.7"
   }
 }

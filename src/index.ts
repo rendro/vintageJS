@@ -1,12 +1,10 @@
-// @flow
-
 import type {
   TEffect,
   TResult,
   TSource,
   TUint8Array,
   TUnaryFn,
-} from './types.js';
+} from './types';
 
 import {
   compose,
@@ -16,7 +14,7 @@ import {
   getResult,
   loadImage,
   loadImageWithCache,
-} from './utils.js';
+} from './utils';
 
 const defaultEffect: TEffect = {
   curves: false,
@@ -38,11 +36,14 @@ const contrastFn: TUnaryFn<number, TUnaryFn<number, number>> = f =>
   c => 259 * (f * 256 + 255) / (255 * (259 - f * 256)) * (c - 128) + 128;
 const brightnessFn: TUnaryFn<number, TUnaryFn<number, number>> = f =>
   c => c + f * 256;
-const screenFn: TUnaryFn<number, TUnaryFn<number, TUnaryFn<number, number>>> = sa =>
+const screenFn: TUnaryFn<
+  number,
+  TUnaryFn<number, TUnaryFn<number, number>>
+> = sa =>
   sc => c => 255 - (255 - c) * (255 - sc * sa) / 255;
 
 const getLUT = (effect: TEffect): Array<TUint8Array> => {
-  const { curves, contrast, brightness, screen, saturation } = effect;
+  const { curves, contrast, brightness, screen } = effect;
   let rMod = idFn;
   let gMod = idFn;
   let bMod = idFn;
@@ -73,9 +74,7 @@ const getLUT = (effect: TEffect): Array<TUint8Array> => {
     gMod = compose(f(screen.g), gMod);
     bMod = compose(f(screen.b), bMod);
   }
-  const idArr = (Uint8ClampedArray
-    ? new Uint8ClampedArray(256)
-    : new Array(256).fill(1)).map((_, idx) => idx);
+  const idArr = new Uint8ClampedArray(256).map((_, idx) => idx);
   return [idArr.map(rMod), idArr.map(gMod), idArr.map(bMod)];
 };
 
@@ -165,7 +164,7 @@ const applyEffect = (effect: TEffect) => {
           ctx.globalCompositeOperation = 'multiply';
           ctx.drawImage(img, 0, 0, width, height);
         } else {
-          const [_, vfCtx] = createCanvasAndCtxFromImage(img, width, height);
+          const [, vfCtx] = createCanvasAndCtxFromImage(img, width, height);
           const { data: vfData } = vfCtx.getImageData(0, 0, width, height);
           const imageData = ctx.getImageData(0, 0, width, height);
           imageData.data.set(imageData.data.map((v, i) => v * vfData[i] / 255));
@@ -177,10 +176,10 @@ const applyEffect = (effect: TEffect) => {
     });
 };
 
-// vintagejs :: TSource -> $Shape<TEffect> -> Promise<TResult>
+// vintagejs :: TSource -> Partial<TEffect> -> Promise<TResult>
 export default (
   src: TSource,
-  partialEffect: $Shape<TEffect>,
+  partialEffect: Partial<TEffect>,
 ): Promise<TResult> => {
   const genSource = typeof src === 'string'
     ? loadImage(src).then(getCanvasAndCtx)
