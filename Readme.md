@@ -123,6 +123,12 @@ Higher performance when canvas blend modes are supported [caniuse.com/#feat=canv
 
 ## Changelog
 
+### 2.3.0
+* Migrated the toolchain from Flow + Browserify to TypeScript + Vite; the library is now written in TypeScript and ships `.d.ts` type declarations
+* Added an ES module build (`dist/vintage.mjs`) alongside the existing UMD (`dist/vintage.js`) and minified (`dist/vintage.min.js`) bundles
+* Fixed all 31 npm audit vulnerabilities (5 critical, 9 high) by removing the legacy build/test dependencies — no runtime dependency was affected
+* No API changes: the UMD global `vintagejs` and the function signature are unchanged
+
 ### 2.2.0
 * Added true grayscale effect (Thanks @bjornbos for PR #38)
 

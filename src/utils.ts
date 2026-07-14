@@ -1,6 +1,4 @@
-// @flow
-
-import type { TUnaryFn, TSource, TResult } from './types.js';
+import type { TUnaryFn, TSource, TResult } from './types';
 
 import nullthrows from 'nullthrows';
 
@@ -82,20 +80,18 @@ export const getGradient = (
   return gradient;
 };
 
-export const loadImage = (src: string): Promise<Image> => new Promise((
-  resolve,
-  reject,
-) => {
-  const img = new Image();
-  img.onload = () => resolve(img);
-  img.crossOrigin = 'anonymous';
-  img.onerror = (err: Error): void => reject(err);
-  img.src = src;
-});
+export const loadImage = (src: string): Promise<HTMLImageElement> =>
+  new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.crossOrigin = 'anonymous';
+    img.onerror = (err) => reject(err);
+    img.src = src;
+  });
 
 export const loadImageWithCache = (() => {
-  const cache: { [src: string]: Image } = {};
-  return (src: string): Promise<Image> => cache[src]
+  const cache: { [src: string]: HTMLImageElement } = {};
+  return (src: string): Promise<HTMLImageElement> => cache[src]
     ? Promise.resolve(cache[src])
     : loadImage(src).then(img => {
         cache[src] = img;
