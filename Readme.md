@@ -93,6 +93,15 @@ type TEffect = {
   gray: boolean,              // default: false
   brightness: number,         // float between -1 and 1, default: 0
   contrast: number,           // float between -1 and 1, default: 0
+  grain: number,              // float between 0 and 1, default: 0
+  lightLeak: false | TLightLeak, // default: false
+};
+
+// A warm glow bleeding in from one edge of the photo
+type TLightLeak = {
+  intensity: number,                            // float between 0 and 1
+  edge?: 'left' | 'right' | 'top' | 'bottom',  // default: 'right'
+  color?: { r: Uint8, g: Uint8, b: Uint8 },    // default: warm orange (255, 112, 36)
 };
 
 // every channel, r=red, g=green, b=blue serves as a look up table for color mappings
@@ -131,7 +140,15 @@ const effect_2 = {
     a: 0.15,
   },
 };
+
+const effect_3 = {
+  grain: 0.35,
+  lightLeak: { intensity: 0.5, edge: 'left' },
+  vignette: 0.3,
+};
 ```
+
+Film grain scales with the image, so a small preview and the full-size photo look the same, and it is identical on every run (no flicker between renders).
 
 See examples folder for more examples.
 
@@ -145,6 +162,12 @@ Higher performance when canvas blend modes are supported [caniuse.com/#feat=canv
 [MIT](http://www.opensource.org/licenses/mit-license.php)
 
 ## Changelog
+
+### 2.5.0
+* New effect `grain`: film grain (0–1) that shows most in the midtones. It scales with the image size and is the same on every run, so previews match full-size renders
+* New effect `lightLeak`: a warm glow bleeding in from one edge (`{ intensity, edge?, color? }`)
+* New exported types `TLightLeak`, `TLightLeakEdge` and `TRGBColor`
+* Tests render real pixels in Node with `@napi-rs/canvas`
 
 ### 2.4.0
 * Web Worker support: `OffscreenCanvas` and `ImageBitmap` are accepted as sources, and without a DOM the effect renders to an `OffscreenCanvas` and viewfinders load with `fetch` + `createImageBitmap`. Behavior in browser windows is unchanged
