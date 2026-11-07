@@ -20,6 +20,20 @@ export type TRGBAColor = {
     readonly b: number;
     readonly a: number;
 };
+export type TRGBColor = {
+    readonly r: number;
+    readonly g: number;
+    readonly b: number;
+};
+export type TLightLeakEdge = 'left' | 'right' | 'top' | 'bottom';
+export type TLightLeak = {
+    /** 0–1 */
+    readonly intensity: number;
+    /** Edge the light bleeds in from. Default: 'right'. */
+    readonly edge?: TLightLeakEdge;
+    /** Glow color. Default: warm orange { r: 255, g: 112, b: 36 }. */
+    readonly color?: TRGBColor;
+};
 export type TCurve = {
     readonly r: Uint8ClampedArray | Array<number>;
     readonly g: Uint8ClampedArray | Array<number>;
@@ -36,6 +50,10 @@ export type TEffect = {
     readonly gray: boolean;
     readonly brightness: number;
     readonly contrast: number;
+    /** Film grain, 0–1. Scales with the image, the same on every run. */
+    readonly grain: number;
+    /** A warm glow bleeding in from one edge. */
+    readonly lightLeak: false | TLightLeak;
 };
 /**
  * The result of applying an effect. `C` is the canvas type the result lives

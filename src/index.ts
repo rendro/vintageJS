@@ -13,8 +13,11 @@ export type {
   TCurve,
   TDrawable,
   TEffect,
+  TLightLeak,
+  TLightLeakEdge,
   TResult,
   TRGBAColor,
+  TRGBColor,
   TSource,
 } from './types';
 
@@ -27,6 +30,7 @@ import {
   loadImage,
   loadImageWithCache,
 } from './utils';
+import { applyGrain, applyLightLeak } from './effects';
 
 const defaultEffect: TEffect = {
   curves: false,
@@ -39,6 +43,8 @@ const defaultEffect: TEffect = {
   gray: false,
   brightness: 0,
   contrast: 0,
+  grain: 0,
+  lightLeak: false,
 };
 
 const idFn: TUnaryFn<number, number> = c => c;
@@ -165,6 +171,14 @@ const applyEffect = (effect: TEffect) => {
           'rgba(0,0,0,0)',
         ]);
         ctx.fillRect(0, 0, width, height);
+      }
+
+      if (effect.lightLeak) {
+        applyLightLeak(ctx, width, height, effect.lightLeak, supportsBlendModes);
+      }
+
+      if (effect.grain > 0) {
+        applyGrain(ctx, width, height, Math.min(1, effect.grain), supportsBlendModes);
       }
 
       if (!effect.viewfinder) {
