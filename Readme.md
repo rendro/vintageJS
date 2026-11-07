@@ -37,6 +37,29 @@ genImage(mimeType?: string, quality?: number): Promise<HTMLImageElement>;
 
 If not provided, mimeType defaults to `image/jpeg` and quality defaults to `1`.
 
+In a browser window, `getCanvas()` returns an `HTMLCanvasElement`. Use `getBlob(mimeType?, quality?): Promise<Blob>` to encode the result without building a data URL; it works everywhere, including Web Workers.
+
+### Using vintagejs in a Web Worker
+
+Effects are applied pixel by pixel, which can block the main thread on large photos. vintagejs also runs in a Web Worker, where there is no DOM: pass an `ImageBitmap` or `OffscreenCanvas` as the source and the result lives on an `OffscreenCanvas`. Viewfinder images are loaded with `fetch` and `createImageBitmap` there.
+
+```javascript
+// worker.js
+import vintagejs from 'vintagejs';
+
+self.onmessage = async ({ data: { bitmap, effect } }) => {
+  const res = await vintagejs(bitmap, effect); // TS: vintagejs<OffscreenCanvas>(...)
+  const result = res.getCanvas().transferToImageBitmap();
+  self.postMessage({ result }, [result]);
+};
+
+// main.js
+const bitmap = await createImageBitmap(file);
+worker.postMessage({ bitmap, effect: { brightness: 0.2 } }, [bitmap]);
+```
+
+`getDataURL()` and `genImage()` need the DOM, so in a worker they throw an error pointing to `getBlob()`.
+
 ### More Examples
 
 ```javascript
@@ -122,6 +145,13 @@ Higher performance when canvas blend modes are supported [caniuse.com/#feat=canv
 [MIT](http://www.opensource.org/licenses/mit-license.php)
 
 ## Changelog
+
+### 2.4.0
+* Web Worker support: `OffscreenCanvas` and `ImageBitmap` are accepted as sources, and without a DOM the effect renders to an `OffscreenCanvas` and viewfinders load with `fetch` + `createImageBitmap`. Behavior in browser windows is unchanged
+* Added `getBlob(mimeType?, quality?)` to the result object
+* `TResult` takes an optional canvas type parameter (`TResult<OffscreenCanvas>`); it defaults to `HTMLCanvasElement`, so existing typings are unchanged
+* The package entry now re-exports the public types (`TEffect`, `TResult`, `TSource`, `TCurve`, `TRGBAColor`, `TCanvas`, `TDrawable`)
+* Fixed: the returned promise never settled when a viewfinder image failed to load; it now rejects
 
 ### 2.3.0
 * Migrated the toolchain from Flow + Browserify to TypeScript + Vite; the library is now written in TypeScript and ships `.d.ts` type declarations

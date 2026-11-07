@@ -1,9 +1,21 @@
 import type {
+  TCanvas,
+  TContext,
   TEffect,
   TResult,
   TSource,
   TUint8Array,
   TUnaryFn,
+} from './types';
+
+export type {
+  TCanvas,
+  TCurve,
+  TDrawable,
+  TEffect,
+  TResult,
+  TRGBAColor,
+  TSource,
 } from './types';
 
 import {
@@ -81,8 +93,8 @@ const getLUT = (effect: TEffect): Array<TUint8Array> => {
 const applyEffect = (effect: TEffect) => {
   const LUT = getLUT(effect);
   return (
-    [canvas, ctx]: [HTMLCanvasElement, CanvasRenderingContext2D],
-  ): Promise<TResult> =>
+    [canvas, ctx]: [TCanvas, TContext],
+  ): Promise<TResult<TCanvas>> =>
     new Promise((resolve, reject) => {
       const { width, height } = canvas;
       ctx.globalCompositeOperation = 'multiply';
@@ -172,15 +184,19 @@ const applyEffect = (effect: TEffect) => {
         }
 
         return resolve(getResult(canvas));
-      });
+      }, reject);
     });
 };
 
 // vintagejs :: TSource -> Partial<TEffect> -> Promise<TResult>
-export default (
+//
+// In a browser window the result lives on an HTMLCanvasElement (default type
+// parameter). In a Web Worker there is no DOM, so the result lives on an
+// OffscreenCanvas: call it as `vintagejs<OffscreenCanvas>(source, effect)`.
+const vintagejs = <C extends TCanvas = HTMLCanvasElement>(
   src: TSource,
   partialEffect: Partial<TEffect>,
-): Promise<TResult> => {
+): Promise<TResult<C>> => {
   const genSource = typeof src === 'string'
     ? loadImage(src).then(getCanvasAndCtx)
     : Promise.resolve(getCanvasAndCtx(src));
@@ -188,5 +204,7 @@ export default (
   return genSource.then(applyEffect({
       ...defaultEffect,
       ...partialEffect,
-    }));
+    })) as Promise<TResult<C>>;
 };
+
+export default vintagejs;
