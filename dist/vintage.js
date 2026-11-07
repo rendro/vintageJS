@@ -28,40 +28,47 @@
   const IMAGE_TYPE = "image/jpeg";
   const IMAGE_QUALITY = 1;
   const compose = (f, g) => (x) => f(g(x));
+  const hasDOM = () => typeof document !== "undefined" && typeof document.createElement === "function";
+  const isHTMLImage = (el) => typeof HTMLImageElement !== "undefined" && el instanceof HTMLImageElement;
+  const isHTMLCanvas = (el) => typeof HTMLCanvasElement !== "undefined" && el instanceof HTMLCanvasElement;
+  const isImageBitmap = (el) => typeof ImageBitmap !== "undefined" && el instanceof ImageBitmap;
+  const isOffscreenCanvas = (el) => typeof OffscreenCanvas !== "undefined" && el instanceof OffscreenCanvas;
+  const createCanvas = (width, height) => {
+    if (hasDOM()) {
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      return canvas;
+    }
+    if (typeof OffscreenCanvas !== "undefined") {
+      return new OffscreenCanvas(width, height);
+    }
+    throw new Error(
+      "vintagejs needs either a DOM or OffscreenCanvas support to create a canvas."
+    );
+  };
+  const get2dContext = (canvas) => nullthrows(
+    canvas.getContext("2d"),
+    "Could not get 2d context for canvas"
+  );
   const createCanvasAndCtxFromImage = (el, width, height) => {
-    const canvas = document.createElement("canvas");
     if (!width) width = el.width;
     if (!height) height = el.height;
-    canvas.width = width;
-    canvas.height = height;
-    const ctx = nullthrows(
-      canvas.getContext("2d"),
-      "Could not get 2d context for canvas"
-    );
+    const canvas = createCanvas(width, height);
+    const ctx = get2dContext(canvas);
     ctx.drawImage(el, 0, 0, width, height);
     return [canvas, ctx];
   };
-  const cloneCanvasAndCtx = (source) => {
-    const { width, height } = source;
-    const target = document.createElement("canvas");
-    const targetCtx = nullthrows(
-      target.getContext("2d"),
-      "Could not get 2d context for canvas"
-    );
-    target.width = width;
-    target.height = height;
-    targetCtx.drawImage(source, 0, 0, width, height);
-    return [target, targetCtx];
-  };
+  const cloneCanvasAndCtx = (source) => createCanvasAndCtxFromImage(source, source.width, source.height);
   const getCanvasAndCtx = (el) => {
-    if (el instanceof HTMLImageElement) {
+    if (isHTMLImage(el) || isImageBitmap(el)) {
       return createCanvasAndCtxFromImage(el);
     }
-    if (el instanceof HTMLCanvasElement) {
+    if (isHTMLCanvas(el) || isOffscreenCanvas(el)) {
       return cloneCanvasAndCtx(el);
     }
     throw new Error(
-      `Unsupported source element. Expected HTMLCanvasElement or HTMLImageElement, got ${typeof el}.`
+      `Unsupported source element. Expected HTMLImageElement, HTMLCanvasElement, OffscreenCanvas or ImageBitmap, got ${typeof el}.`
     );
   };
   const getGradient = (ctx, width, height, colorSteps) => {
@@ -78,31 +85,68 @@
     });
     return gradient;
   };
-  const loadImage = (src) => new Promise((resolve, reject) => {
+  const loadImageElement = (src) => new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => resolve(img);
     img.crossOrigin = "anonymous";
     img.onerror = (err) => reject(err);
     img.src = src;
   });
+  const loadImageBitmap = (src) => fetch(src).then((res) => {
+    if (!res.ok) {
+      throw new Error(`Could not load image ${src}: HTTP ${res.status}`);
+    }
+    return res.blob();
+  }).then((blob) => createImageBitmap(blob));
+  const loadImage = (src) => typeof Image !== "undefined" ? loadImageElement(src) : loadImageBitmap(src);
   const loadImageWithCache = /* @__PURE__ */ (() => {
     const cache = {};
-    return (src) => cache[src] ? Promise.resolve(cache[src]) : loadImage(src).then((img) => {
-      cache[src] = img;
-      return img;
-    });
+    return (src) => {
+      if (!cache[src]) {
+        cache[src] = loadImage(src).catch((err) => {
+          delete cache[src];
+          throw err;
+        });
+      }
+      return cache[src];
+    };
   })();
-  const getResult = (canvas) => ({
-    getDataURL(mimeType = IMAGE_TYPE, quality = IMAGE_QUALITY) {
+  const getResult = (canvas) => {
+    const getDataURL = (mimeType = IMAGE_TYPE, quality = IMAGE_QUALITY) => {
+      if (!isHTMLCanvas(canvas)) {
+        throw new Error(
+          "getDataURL() needs an HTMLCanvasElement. Use getBlob() when running in a Web Worker."
+        );
+      }
       return canvas.toDataURL(mimeType, quality);
-    },
-    getCanvas() {
-      return canvas;
-    },
-    genImage(mimeType = IMAGE_TYPE, quality = IMAGE_QUALITY) {
-      return loadImage(canvas.toDataURL(mimeType, quality));
-    }
-  });
+    };
+    return {
+      getDataURL,
+      getCanvas() {
+        return canvas;
+      },
+      getBlob(mimeType = IMAGE_TYPE, quality = IMAGE_QUALITY) {
+        if (isHTMLCanvas(canvas)) {
+          return new Promise((resolve, reject) => {
+            canvas.toBlob(
+              (blob) => blob ? resolve(blob) : reject(new Error("Could not encode canvas")),
+              mimeType,
+              quality
+            );
+          });
+        }
+        return canvas.convertToBlob({
+          type: mimeType,
+          quality
+        });
+      },
+      genImage(mimeType = IMAGE_TYPE, quality = IMAGE_QUALITY) {
+        return new Promise(
+          (resolve) => resolve(getDataURL(mimeType, quality))
+        ).then(loadImageElement);
+      }
+    };
+  };
   const defaultEffect = {
     curves: false,
     screen: false,
@@ -226,15 +270,15 @@
           ctx.putImageData(imageData, 0, 0);
         }
         return resolve(getResult(canvas));
-      });
+      }, reject);
     });
   };
-  const index = (src, partialEffect) => {
+  const vintagejs = (src, partialEffect) => {
     const genSource = typeof src === "string" ? loadImage(src).then(getCanvasAndCtx) : Promise.resolve(getCanvasAndCtx(src));
     return genSource.then(applyEffect({
       ...defaultEffect,
       ...partialEffect
     }));
   };
-  return index;
+  return vintagejs;
 }));

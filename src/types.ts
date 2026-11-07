@@ -4,7 +4,28 @@ export type TUnaryFn<A, B> = (a: A) => B;
 
 export type TPixel = [number, number, number];
 
-export type TSource = string | HTMLImageElement | HTMLCanvasElement;
+/**
+ * A canvas the effect can be rendered to. In a browser window this is an
+ * `HTMLCanvasElement`; inside a Web Worker (no DOM) it is an `OffscreenCanvas`.
+ */
+export type TCanvas = HTMLCanvasElement | OffscreenCanvas;
+
+export type TContext =
+  | CanvasRenderingContext2D
+  | OffscreenCanvasRenderingContext2D;
+
+/** Anything that can be drawn onto a canvas as the effect's input. */
+export type TDrawable =
+  | HTMLImageElement
+  | HTMLCanvasElement
+  | OffscreenCanvas
+  | ImageBitmap;
+
+/**
+ * A URL / data URI, or an element or bitmap to read pixels from.
+ * `OffscreenCanvas` and `ImageBitmap` work in both windows and Web Workers.
+ */
+export type TSource = string | TDrawable;
 
 export type TRGBAColor = {
   readonly r: number;
@@ -32,8 +53,17 @@ export type TEffect = {
   readonly contrast: number;
 };
 
-export type TResult = {
+/**
+ * The result of applying an effect. `C` is the canvas type the result lives
+ * on: `HTMLCanvasElement` in a window (the default) and `OffscreenCanvas` in a
+ * Web Worker, e.g. `vintagejs<OffscreenCanvas>(bitmap, effect)`.
+ */
+export type TResult<C extends TCanvas = HTMLCanvasElement> = {
+  /** Only available on the main thread (`HTMLCanvasElement`); use `getBlob` in workers. */
   getDataURL(mimeType?: string, quality?: number): string;
-  getCanvas(): HTMLCanvasElement;
+  getCanvas(): C;
+  /** Encodes the result; works on the main thread and in Web Workers. */
+  getBlob(mimeType?: string, quality?: number): Promise<Blob>;
+  /** Only available on the main thread, since it creates an `HTMLImageElement`. */
   genImage(mimeType?: string, quality?: number): Promise<HTMLImageElement>;
 };
